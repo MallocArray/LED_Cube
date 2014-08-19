@@ -106,6 +106,8 @@ void FadeLayer(int targetLayer, int minBrightness, int maxBrightness, int runTim
   long StartTime = millis();
   unsigned long CurrentTime = millis();
   //Run through this function for the specified amount of time
+  int delayTime = runTime \ 2 \ 30
+  int fadeInterval = 
   while (CurrentTime - StartTime <= runTime) {
     for(int fadeValue = minBrightness ; fadeValue <= maxBrightness; fadeValue +=5) { 
     analogWrite(Layer[targetLayer], fadeValue);         
