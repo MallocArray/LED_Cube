@@ -255,12 +255,14 @@ void CyclePins(int RunTime) {
   while (CurrentTime - StartTime <= RunTime) {
     //Cycle through each Decoder output, at a specified delay
     for (int x=0; x<=7; x++) {
-      digitalWrite(col25, HIGH); //To keep the last column in sync, it cycles off an on like the others
+      if (x==0) digitalWrite(col25, HIGH); //To keep the last column in sync, it cycles off an on like the others
+      if (x==1) digitalWrite(col25, LOW); //To keep the last column in sync, it cycles off an on like the others
+      //digitalWrite(col25, HIGH);
       SetDecoder(0, x);
       SetDecoder(1, x);
       SetDecoder(2, x);
-      digitalWrite(col25, LOW);
-      delayMicroseconds(250); //When using 1 millisecond, the 25th column looks dimmer
+      //digitalWrite(col25, LOW);
+      //delayMicroseconds(250); //When using 1 millisecond, the 25th column looks dimmer
     }
     CurrentTime = millis();
   }
