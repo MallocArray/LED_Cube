@@ -30,10 +30,12 @@ void FadeLayer(int targetLayer, int runTime=1500, int minBrightness=0, int maxBr
 void setup() {
   // the array elements are numbered from 0 to (pinCount - 1).
   // use a for loop to initialize each pin as an output:
+  delay(1);
   for (int thisPin = 0; thisPin < pinCount; thisPin++)  {
     pinMode(ledPins[thisPin], OUTPUT);   
     digitalWrite(ledPins[thisPin], LOW);  
   }
+  delay(1);
 //  Serial.begin(9600);
 }
 
