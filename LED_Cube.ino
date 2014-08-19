@@ -43,7 +43,7 @@ void setup() {
 
 void loop() {
   //Main loop for various patterns
-
+/*
   LayerWalk(25);
   WalkLayerUpDown(25);
   WalkLayerUpDownReverse(25);
@@ -58,8 +58,12 @@ void loop() {
   CrawlFullCube(1000);
   FillFullCube(2000);
   //DesignCube(2000);  Buggy.  Depends on what things were at before starting function
+  */
+  //delay(0);
   LightFullCube(5000);
-  for (int x=0; x<=15; x++) FadeLed(random(125));
+  //FullReset();
+  
+  //for (int x=0; x<=15; x++) FadeLed(random(125));
 //  WalkSpiral(100); //Still needs work.  Break out spiral in and out
   //FadeLed(random(125));
   //delay(3000);
@@ -264,8 +268,6 @@ void CyclePins(int RunTime) {
 
 void LightFullCube (int RunTime) {
   //Lights all LED on the entire cube for a duration of milliseconds
-  long StartTime = millis();
-  unsigned long CurrentTime = millis();
   for (int x=0; x<=4; x++) SetLayer(x, "On"); //Turn all layers on
   //Run through this function for the specified amount of time
   CyclePins(RunTime);
