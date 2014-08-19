@@ -21,6 +21,12 @@ const int Layer[5] = {5,6,9,10,11};
 const int layersTotal = 5; //Total number of layers in cube
 const int columnsTotal = 25; //Total number of columns in a layer 5x5
 
+//Function Prototypes to allow for default argument values
+//Must be above the Setup line? http://forum.arduino.cc/index.php/topic,40799.0.html
+void FadeLed(int targetLed, int runTime=1500, int minBrightness=0, int maxBrightness=255);
+void FadeLayer(int targetLayer, int runTime=1500, int minBrightness=0, int maxBrightness=255);
+
+
 void setup() {
   // the array elements are numbered from 0 to (pinCount - 1).
   // use a for loop to initialize each pin as an output:
@@ -54,8 +60,8 @@ void loop() {
   LightFullCube(5000);
 */
 //  WalkSpiral(100); //Still needs work.  Break out spiral in and out
-  FadeLed(0, 0, 255, 1000);
-  delay(3000)
+  FadeLed(random(125));
+  //delay(3000);
 
 
 //  LayerByLayerUp(250); //Will need POV to allow all decoder pins to be on
@@ -64,7 +70,7 @@ void loop() {
 //  ColumnByColumnToEmpty(250);
 }
 
-void FadeLed(int targetLed, int minBrightness, int maxBrightness, int runTime) {
+void FadeLed(int targetLed, int runTime, int minBrightness, int maxBrightness) {
   //Calculate which layer needs to be used
   //Divide the targetLed by the total number of columns in a layer
   //Since it will round down to the nearest whole number, this gives the layer
@@ -79,7 +85,7 @@ void FadeLed(int targetLed, int minBrightness, int maxBrightness, int runTime) {
   //The decoder will accept this on 3 pins as binary to output to 8 pins
   int targetDecoderInput = targetColumn % 8;
   //Turn off unneeded decoders and layers
-//  FullReset();
+  //FullReset();
   for (int x = 0; x<=2; x++) {
     if (x != targetDecoder) 
     //Except for the targetDecoder, turn all others off
@@ -96,33 +102,28 @@ void FadeLed(int targetLed, int minBrightness, int maxBrightness, int runTime) {
   else digitalWrite(col25, LOW);
   //Enable power to the target layer
   //SetLayer(targetLayer, "On");
-  FadeLayer(targetLayer, minBrightness, maxBrightness, runTime);
+  FadeLayer(targetLayer, runTime, minBrightness, maxBrightness);
 }
 
 
 
-void FadeLayer(int targetLayer, int minBrightness, int maxBrightness, int runTime) {
+void FadeLayer(int targetLayer, int runTime, int minBrightness, int maxBrightness) {
   //Accepts a Layer, and brightness values, and runs for that long, fading the value in and out
-  long StartTime = millis();
-  unsigned long CurrentTime = millis();
   //Run through this function for the specified amount of time
-  int delayTime = runTime \ 2 \ 30
-  int fadeInterval = 
-  while (CurrentTime - StartTime <= runTime) {
-    for(int fadeValue = minBrightness ; fadeValue <= maxBrightness; fadeValue +=5) { 
+  int delayTime = runTime / 2 / 51;
+  int fadeInterval = (maxBrightness - minBrightness) / 51;
+  for(int fadeValue = minBrightness ; fadeValue <= maxBrightness; fadeValue += fadeInterval) { 
     analogWrite(Layer[targetLayer], fadeValue);         
-    // wait for 30 milliseconds to see the dimming effect    
-    delay(30);                            
-    } 
-    // fade out from max to min in increments of 5 points:
-    for(int fadeValue = maxBrightness ; fadeValue >= minBrightness; fadeValue -=5) { 
-      // sets the value (range from 0 to 255):
-      analogWrite(Layer[targetLayer], fadeValue);         
-      // wait for 30 milliseconds to see the dimming effect    
-      delay(30);                            
-    } 
-    CurrentTime = millis();
-  }
+    //Wait to see the dimming effect
+    delay(delayTime);
+  } 
+  // fade out from max to min in increments of 5 points:
+  for(int fadeValue = maxBrightness ; fadeValue >= minBrightness; fadeValue -=fadeInterval) { 
+    // sets the value (range from 0 to 255):
+    analogWrite(Layer[targetLayer], fadeValue);         
+    //Wait to see the dimming effect
+    delay(delayTime);                            
+  } 
 }
 
 
