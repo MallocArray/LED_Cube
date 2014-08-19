@@ -1,5 +1,5 @@
 int ledPins[] = {2, 3, 4, 8, 12, 13, A1, A2, A3, A5, 5, 6, 9, 10, 11, 7, A0, A4 }; // an array of pin numbers to which LEDs are attached
-int pinCount = 18; 
+int pinCount = 18; //Total number of pins to setup
 
 /*Each decoder has an A, B, and C pin
 Setup an array for each pin on each decoder.
@@ -9,12 +9,14 @@ const int DecoderPinA[3] = {2,8,A1};
 const int DecoderPinB[3] = {3,12,A2};
 const int DecoderPinC[3] = {4,13,A3};
 
+//Each decoder has a pin to enable it.  Setting this pin to LOW will disable all decoder output
+const int EnableDecoder[3] = {7,A0,A4};
+
 //Last column is not connected to line decoder, but directly to an Arduino pin and transistor
 const int col25 = A5;
 
 //Each layer is directly connected to Arduino
 const int Layer[5] = {5,6,9,10,11};
-const int EnableDecoder[3] = {7,A0,A4};
 
 const int layersTotal = 5; //Total number of layers in cube
 const int columnsTotal = 25; //Total number of columns in a layer 5x5
@@ -26,17 +28,18 @@ void setup() {
     pinMode(ledPins[thisPin], OUTPUT);   
     digitalWrite(ledPins[thisPin], LOW);  
   }
-  Serial.begin(9600);
+//  Serial.begin(9600);
 }
 
 void loop() {
   //Main loop for various patterns
-//  LayerWalk(50);
-//  WalkLayerUpDown(80);
-//  WalkLayerUpDownReverse(80);
-  WalkSpiral(150);
+/*
+  LayerWalk(50);
+  WalkLayerUpDown(50);
+  WalkLayerUpDownReverse(50);
+*/
+  WalkSpiral(100);
   delay(5000);
-
 
 //  LayerByLayerUp(250); //Will need POV to allow all decoder pins to be on
 //  LayerByLayerDown(250); //Will need POV to allow all decoder pins to be on
@@ -45,13 +48,14 @@ void loop() {
 }
 
 int WalkSpiral(int delayTime) {
-  //Starting at 0, spiral around the perimeter spiraling in to the middle
+  //Starting at 0, spiral around the perimeter spiraling in to the middle then unwind on next layer
   int interval = 5;
   int iteration = 4;
   int i = 0;
   int direction = 1;
   
   for (;i != 125;) {
+    //Spiral to inside
     for (int x=0; x <= 2; x++) {
       //South side
       //For number of iterations left, go sequentially forward
@@ -97,6 +101,7 @@ int WalkSpiral(int delayTime) {
       }
     } 
    i = i + 8;
+   iteration = 4;
 //  direction = -direction;
   }
 }
