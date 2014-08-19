@@ -33,10 +33,42 @@ void loop() {
   //Main loop for various patterns
 //  LayerWalk(150);
   WalkLayerUpDown(150);
+  WalkLayerUpDownReverse(150);
 //  LayerByLayerUp(250); //Will need POV to allow all decoder pins to be on
 //  LayerByLayerDown(250); //Will need POV to allow all decoder pins to be on
 //  ColumnByColumnToFull(250);
 //  ColumnByColumnToEmpty(250);
+}
+
+int walkSpiral(int delayTime) {
+  //Starting at 0, spiral around the perimeter spiraling in to the middle
+  int interval = 25;
+  int iteration = 5;
+  //Continue through ever LED
+  for (int i=0; i < layersTotal * columnsTotal; i++) {
+    //For 3 times, travel along a side, then decrease the number of iterations
+    for (int x=0; x < 3; x++) {
+      //for the current iteration value, go sequentially forward
+     //South side
+      for (int y=0; y < iteration; y++) {
+        led(i);
+        delay(delayTime);
+        i++;
+      }
+      //For the current iteration value, go up the interval value, following one side
+      //East side
+      for (int z=0; z < iteration; z++) {
+        led(i)
+        delay(delayTime);
+        i = i + interval;
+      }
+      //For the current iteration value, go across the interval value, lower in number
+      //North side
+      for (int w=0;
+    }
+    //When at the end of a row of columns, inverse the interval to go backwards on next row of columns
+    interval = -interval;
+  }
 }
 
 void Status() {
@@ -167,7 +199,7 @@ void LayerWalk(int delayTime){
 }
 
 void WalkLayerUpDown(int delayTime) {
-  //Rather than walking through LED sequentially, go up and down the columns
+  //Rather than walking through LED sequentially, go up and down the columns going up
   int interval = 25;
   //Start at 0, and walk through every LED
   for (int i=0; i < layersTotal * columnsTotal; i++) {
@@ -176,6 +208,22 @@ void WalkLayerUpDown(int delayTime) {
       led(i);
       delay(delayTime);
       i = i + interval;
+    }
+    //When at the end of a row of columns, inverse the interval to go backwards on next row of columns
+    interval = -interval;
+  }
+}
+
+void WalkLayerUpDownReverse(int delayTime) {
+  //Rather than walking through LED sequentially, go up and down the columns going down
+  int interval = 25;
+  //Start at 0, and walk through every LED
+  for (int i=layersTotal * columnsTotal; i >= 0; i--) {
+    //For 5 times, light up an LED, then jump an interval
+    for (int x=0; x < 5; x++) {
+      led(i);
+      delay(delayTime);
+      i = i - interval;
     }
     //When at the end of a row of columns, inverse the interval to go backwards on next row of columns
     interval = -interval;
@@ -290,202 +338,4 @@ void ColumnByColumnToEmpty(int DelayTime) {
   digitalWrite(DecoderPinB[0], LOW);
   digitalWrite(DecoderPinC[0], LOW);
   delay(DelayTime);
-}
-
-//single LED Enable.  Does not disable LED on other Decoders
-void LED1() {
-  digitalWrite(EnableDecoder[0], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[0], LOW);
-  digitalWrite(DecoderPinB[0], LOW);
-  digitalWrite(DecoderPinC[0], LOW);
-}
-
-void LED2() {
-  digitalWrite(EnableDecoder[0], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], LOW);
-  digitalWrite(DecoderPinC[0], LOW);
-}
-
-void LED3() {
-  digitalWrite(EnableDecoder[0], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[0], LOW);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], LOW);
-}
-
-void LED4() {
-  digitalWrite(EnableDecoder[0], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], LOW);
-}
-
-void LED5() {
-  digitalWrite(EnableDecoder[0], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[0], LOW);
-  digitalWrite(DecoderPinB[0], LOW);
-  digitalWrite(DecoderPinC[0], HIGH);
-}
-
-void LED6() {
-  digitalWrite(EnableDecoder[0], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], LOW);
-  digitalWrite(DecoderPinC[0], HIGH);
-}
-
-void LED7() {
-  digitalWrite(EnableDecoder[0], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[0], LOW);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], HIGH);
-}
-
-void LED8() {
-  digitalWrite(EnableDecoder[0], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], HIGH);
-}
-
-void LED9() {
-  digitalWrite(EnableDecoder[1], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[1], LOW);
-  digitalWrite(DecoderPinB[1], LOW);
-  digitalWrite(DecoderPinC[1], LOW);
-}
-
-void LED10() {
-  digitalWrite(EnableDecoder[1], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[1], HIGH);
-  digitalWrite(DecoderPinB[1], LOW);
-  digitalWrite(DecoderPinC[1], LOW);
-}
-
-void LED11() {
-  digitalWrite(EnableDecoder[1], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[1], LOW);
-  digitalWrite(DecoderPinB[1], HIGH);
-  digitalWrite(DecoderPinC[1], LOW);
-}
-
-void LED12() {
-  digitalWrite(EnableDecoder[1], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[1], HIGH);
-  digitalWrite(DecoderPinB[1], HIGH);
-  digitalWrite(DecoderPinC[1], LOW);
-}
-
-void LED13() {
-  digitalWrite(EnableDecoder[1], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[1], LOW);
-  digitalWrite(DecoderPinB[1], LOW);
-  digitalWrite(DecoderPinC[1], HIGH);
-}
-
-void LED14() {
-  digitalWrite(EnableDecoder[1], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[1], HIGH);
-  digitalWrite(DecoderPinB[1], LOW);
-  digitalWrite(DecoderPinC[1], HIGH);
-}
-
-void LED15() {
-  digitalWrite(EnableDecoder[1], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[1], LOW);
-  digitalWrite(DecoderPinB[1], HIGH);
-  digitalWrite(DecoderPinC[1], HIGH);
-}
-
-void LED16() {
-  digitalWrite(EnableDecoder[1], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[1], HIGH);
-  digitalWrite(DecoderPinB[1], HIGH);
-  digitalWrite(DecoderPinC[1], HIGH);
-}
-
-void LED17() {
-  digitalWrite(EnableDecoder[2], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[2], LOW);
-  digitalWrite(DecoderPinB[2], LOW);
-  digitalWrite(DecoderPinC[2], LOW);
-}
-
-void LED18() {
-  digitalWrite(EnableDecoder[2], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[2], HIGH);
-  digitalWrite(DecoderPinB[2], LOW);
-  digitalWrite(DecoderPinC[2], LOW);
-}
-
-void LED19() {
-  digitalWrite(EnableDecoder[2], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[2], LOW);
-  digitalWrite(DecoderPinB[2], HIGH);
-  digitalWrite(DecoderPinC[2], LOW);
-}
-
-void LED20() {
-  digitalWrite(EnableDecoder[2], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[2], HIGH);
-  digitalWrite(DecoderPinB[2], HIGH);
-  digitalWrite(DecoderPinC[2], LOW);
-}
-
-void LED21() {
-  digitalWrite(EnableDecoder[2], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[2], LOW);
-  digitalWrite(DecoderPinB[2], LOW);
-  digitalWrite(DecoderPinC[2], HIGH);
-}
-
-void LED22() {
-  digitalWrite(EnableDecoder[2], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[2], HIGH);
-  digitalWrite(DecoderPinB[2], LOW);
-  digitalWrite(DecoderPinC[2], HIGH);
-}
-
-void LED23() {
-  digitalWrite(EnableDecoder[2], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[2], LOW);
-  digitalWrite(DecoderPinB[2], HIGH);
-  digitalWrite(DecoderPinC[2], HIGH);
-}
-
-void LED24() {
-  digitalWrite(EnableDecoder[2], HIGH);
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(DecoderPinA[2], HIGH);
-  digitalWrite(DecoderPinB[2], HIGH);
-  digitalWrite(DecoderPinC[2], HIGH);
-}
-
-void LED25() {
-  digitalWrite(Layer[0], HIGH);
-  digitalWrite(col25, HIGH);
 }
