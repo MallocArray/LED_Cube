@@ -31,45 +31,138 @@ void setup() {
 
 void loop() {
   //Main loop for various patterns
-//  LayerWalk(150);
-  WalkLayerUpDown(150);
-  WalkLayerUpDownReverse(150);
+//  LayerWalk(50);
+//  WalkLayerUpDown(80);
+//  WalkLayerUpDownReverse(80);
+  WalkSpiral(150);
+  delay(5000);
+
+
 //  LayerByLayerUp(250); //Will need POV to allow all decoder pins to be on
 //  LayerByLayerDown(250); //Will need POV to allow all decoder pins to be on
 //  ColumnByColumnToFull(250);
 //  ColumnByColumnToEmpty(250);
 }
 
-int walkSpiral(int delayTime) {
+int WalkSpiral(int delayTime) {
   //Starting at 0, spiral around the perimeter spiraling in to the middle
-  int interval = 25;
-  int iteration = 5;
-  //Continue through ever LED
-  for (int i=0; i < layersTotal * columnsTotal; i++) {
-    //For 3 times, travel along a side, then decrease the number of iterations
-    for (int x=0; x < 3; x++) {
-      //for the current iteration value, go sequentially forward
-     //South side
-      for (int y=0; y < iteration; y++) {
+  int interval = 5;
+  int iteration = 4;
+  int i = 0;
+  int direction = 1;
+  
+  for (;i != 125;) {
+    for (int x=0; x <= 2; x++) {
+      //South side
+      //For number of iterations left, go sequentially forward
+      for (int s=0; s <= iteration; s++) {
         led(i);
         delay(delayTime);
-        i++;
+        if (s != iteration) i+= direction;
+        else {
+          //One less interation
+          iteration--;
+          //Next LED
+          i = i + interval;
+        }
       }
-      //For the current iteration value, go up the interval value, following one side
       //East side
-      for (int z=0; z < iteration; z++) {
-        led(i)
+      //For number of iterations left, go up the interval value, following one side
+      for (int e=0; e <= iteration; e++) {
+        led(i);
         delay(delayTime);
-        i = i + interval;
+        if (e != iteration) i = i + interval;
+        else i-= direction;
       }
-      //For the current iteration value, go across the interval value, lower in number
       //North side
-      for (int w=0;
-    }
-    //When at the end of a row of columns, inverse the interval to go backwards on next row of columns
-    interval = -interval;
+      //For number of iterations left, go across layer, sequentially lower
+      for (int n=0; n <= iteration; n++) {
+        led(i);
+        delay(delayTime);
+        if (n != iteration) i-=direction;
+        else {
+          //One less iteration
+          iteration--;
+          //Next LED
+          i = i - interval;
+        }
+      }
+      //For the current iteration value, go down the interval value
+      // West side
+      for (int w=0; w <= iteration; w++) {
+        led(i);
+        delay(delayTime);
+        if (w != iteration) i = i - interval;
+        else i+= direction;
+      }
+    } 
+   i = i + 8;
+//  direction = -direction;
   }
 }
+
+void WalkLayerUpDownReverse(int delayTime) {
+  //Rather than walking through LED sequentially, go up and down the columns going down
+  int interval = -5;
+  int i = 124;
+  int direction = -1;
+  //Start at 124, and walk through every LED in reverse
+  while (i >= 0 ) {
+    //Along the X axis
+    for (int x=0; x <= 4; x++) {
+      //Along the Y axis
+      for (int y=0; y <= 4; y++) {
+        led(i);
+        delay(delayTime);
+        //Not incrementing if last time through
+        if (y != 4) i = i + interval;  
+      }
+      //When at the end of a row of columns, inverse the interval to go backwards on next row of columns
+      //Change direction of the interval
+      interval = -interval;
+      //Do not increment if last time through
+      if (x != 4) i = i + direction;
+    }
+    //Jump up a layer 
+    i = i - 25;
+    //Change direction after a layer is completed
+    direction = -direction;
+  }
+}
+
+void WalkLayerUpDown(int delayTime) {
+  //Rather than walking through LED sequentially, go up and down the columns going up
+  int interval = 5;
+  int i = 0;
+  int direction = 1;
+  //Start at 0, and walk through every LED
+  while (i < layersTotal * columnsTotal) {
+    //Along the X axis
+    for (int x=0; x <= 4; x++) {
+      //Along the Y axis
+      for (int y=0; y <= 4; y++) {
+        led(i);
+        delay(delayTime);
+        //Not incrementing if last time through
+        if (y != 4) i = i + interval;  
+      }
+      //When at the end of a row of columns, inverse the interval to go backwards on next row of columns
+      //Change direction of the interval
+      interval = -interval;
+      //Do not increment if last time through
+      if (x != 4) i = i + direction;
+    }
+    //Jump up a layer 
+    i = i + 25;
+    //Change direction after a layer is completed
+    direction = -direction;
+  }
+}
+
+
+
+
+
 
 void Status() {
   int layerstatus;
@@ -198,37 +291,6 @@ void LayerWalk(int delayTime){
   }
 }
 
-void WalkLayerUpDown(int delayTime) {
-  //Rather than walking through LED sequentially, go up and down the columns going up
-  int interval = 25;
-  //Start at 0, and walk through every LED
-  for (int i=0; i < layersTotal * columnsTotal; i++) {
-    //For 5 times, light up an LED, then jump an interval
-    for (int x=0; x < 5; x++) {
-      led(i);
-      delay(delayTime);
-      i = i + interval;
-    }
-    //When at the end of a row of columns, inverse the interval to go backwards on next row of columns
-    interval = -interval;
-  }
-}
-
-void WalkLayerUpDownReverse(int delayTime) {
-  //Rather than walking through LED sequentially, go up and down the columns going down
-  int interval = 25;
-  //Start at 0, and walk through every LED
-  for (int i=layersTotal * columnsTotal; i >= 0; i--) {
-    //For 5 times, light up an LED, then jump an interval
-    for (int x=0; x < 5; x++) {
-      led(i);
-      delay(delayTime);
-      i = i - interval;
-    }
-    //When at the end of a row of columns, inverse the interval to go backwards on next row of columns
-    interval = -interval;
-  }
-}
     
 void LayerByLayerUp(int DelayTime) {
   //Starts with all layers off and all columns HIGH
