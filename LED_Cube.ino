@@ -43,7 +43,7 @@ void setup() {
 
 void loop() {
   //Main loop for various patterns
-/*
+
   LayerWalk(25);
   WalkLayerUpDown(25);
   WalkLayerUpDownReverse(25);
@@ -54,13 +54,14 @@ void loop() {
     ColumnUp(random(25), 150); //Random up the column
     ColumnDown(random(100, 125), 150); //Random down the column
   }
+  LayerWalk(1);
   CrawlFullCube(1000);
   FillFullCube(2000);
   //DesignCube(2000);  Buggy.  Depends on what things were at before starting function
   LightFullCube(5000);
-*/
+  for (int x=0; x<=15; x++) FadeLed(random(125));
 //  WalkSpiral(100); //Still needs work.  Break out spiral in and out
-  FadeLed(random(125));
+  //FadeLed(random(125));
   //delay(3000);
 
 
