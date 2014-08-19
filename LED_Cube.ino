@@ -31,9 +31,13 @@ void setup() {
 //  Serial.begin(9600);
 }
 
+
+
+
+
 void loop() {
   //Main loop for various patterns
-
+/*
   LayerWalk(25);
   WalkLayerUpDown(25);
   WalkLayerUpDownReverse(25);
@@ -48,9 +52,10 @@ void loop() {
   FillFullCube(2000);
   //DesignCube(2000);  Buggy.  Depends on what things were at before starting function
   LightFullCube(5000);
-
+*/
 //  WalkSpiral(100); //Still needs work.  Break out spiral in and out
-
+  FadeLed(0, 0, 255, 1000);
+  delay(3000)
 
 
 //  LayerByLayerUp(250); //Will need POV to allow all decoder pins to be on
@@ -58,6 +63,66 @@ void loop() {
 //  ColumnByColumnToFull(250);
 //  ColumnByColumnToEmpty(250);
 }
+
+void FadeLed(int targetLed, int minBrightness, int maxBrightness, int runTime) {
+  //Calculate which layer needs to be used
+  //Divide the targetLed by the total number of columns in a layer
+  //Since it will round down to the nearest whole number, this gives the layer
+  int targetLayer = targetLed / columnsTotal;
+  //Subtract the number of columns in other layers
+  //Result is the column needed for this layer
+  int targetColumn = targetLed - (targetLayer * columnsTotal);
+  //Calculate which decoder to address
+  //Each line decoder can output to 8 pins each.
+  int targetDecoder = targetColumn / 8;
+  //Calculate the input for the targetDecoder
+  //The decoder will accept this on 3 pins as binary to output to 8 pins
+  int targetDecoderInput = targetColumn % 8;
+  //Turn off unneeded decoders and layers
+//  FullReset();
+  for (int x = 0; x<=2; x++) {
+    if (x != targetDecoder) 
+    //Except for the targetDecoder, turn all others off
+    digitalWrite(EnableDecoder[x], LOW);
+  }
+  for (int x = 0; x<=5; x++) {
+    //Turn off other layers not needed
+    if (x != targetLayer) digitalWrite(Layer[x], LOW);
+  }
+  //Set the decoder output to the correct pin
+  SetDecoder(targetDecoder, targetDecoderInput);
+  //Special handling for column 24 as it is directly connected to Arduino and not a line decoder
+  if (targetColumn == 24) digitalWrite(col25, HIGH);
+  else digitalWrite(col25, LOW);
+  //Enable power to the target layer
+  //SetLayer(targetLayer, "On");
+  FadeLayer(targetLayer, minBrightness, maxBrightness, runTime);
+}
+
+
+
+void FadeLayer(int targetLayer, int minBrightness, int maxBrightness, int runTime) {
+  //Accepts a Layer, and brightness values, and runs for that long, fading the value in and out
+  long StartTime = millis();
+  unsigned long CurrentTime = millis();
+  //Run through this function for the specified amount of time
+  while (CurrentTime - StartTime <= runTime) {
+    for(int fadeValue = minBrightness ; fadeValue <= maxBrightness; fadeValue +=5) { 
+    analogWrite(Layer[targetLayer], fadeValue);         
+    // wait for 30 milliseconds to see the dimming effect    
+    delay(30);                            
+    } 
+    // fade out from max to min in increments of 5 points:
+    for(int fadeValue = maxBrightness ; fadeValue >= minBrightness; fadeValue -=5) { 
+      // sets the value (range from 0 to 255):
+      analogWrite(Layer[targetLayer], fadeValue);         
+      // wait for 30 milliseconds to see the dimming effect    
+      delay(30);                            
+    } 
+    CurrentTime = millis();
+  }
+}
+
 
 void DesignCube(int RunTime) {
   long StartTime = millis();
@@ -466,9 +531,11 @@ void SetDecoder (int targetDecoder, int targetOutput) {
 
 void SetLayer(int targetLayer, String desiredStatus) {
   //Accepts a layer number and On or Off to make apporopriate changes
-  if (desiredStatus == "On")   digitalWrite(Layer[targetLayer], HIGH);
-  if (desiredStatus == "Off")   digitalWrite(Layer[targetLayer], LOW);
+  if (desiredStatus == "On" || desiredStatus == "on" || desiredStatus == "1")   digitalWrite(Layer[targetLayer], HIGH);
+  if (desiredStatus == "Off" || desiredStatus == "off" || desiredStatus == "0")   digitalWrite(Layer[targetLayer], LOW);
 }
+
+
 
 void FullReset() {
   //Turn off all columns and layers
