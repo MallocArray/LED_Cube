@@ -38,7 +38,13 @@ void loop() {
   WalkLayerUpDown(50);
   WalkLayerUpDownReverse(50);
 */
-  WalkSpiral(100);
+//  WalkSpiral(100); //Still needs work
+  for (int x=0; x <= 40; x++) RandomLed(150); 
+  for (int x=0; x <= 10; x++) {
+    ColumnUpDown(random(25), 150);
+    ColumnUp(random(25), 150);
+    ColumnDown(random(100, 125), 150);
+  }
   delay(5000);
 
 //  LayerByLayerUp(250); //Will need POV to allow all decoder pins to be on
@@ -46,6 +52,55 @@ void loop() {
 //  ColumnByColumnToFull(250);
 //  ColumnByColumnToEmpty(250);
 }
+
+void RandomLed (int delayTime) {
+  led(random(125));
+  delay(delayTime);
+}
+
+void ColumnUpDown (int targetLed, int delayTime) {
+  led(targetLed);
+  delay(delayTime);
+  for (int x=1; x<=4; x++) {
+    SetLayer(x, "On");
+    delay(delayTime);
+  }
+  for (int x=4; x>=0; x--) {
+    SetLayer(x, "Off");
+    delay(delayTime);
+  }
+}
+
+void ColumnUp (int targetLed, int delayTime) {
+  //Accepts a layer 0 led and a delay and crawls up
+  FullReset();
+  led(targetLed);
+  delay(delayTime);
+  for (int x=1; x<=4; x++) {
+    SetLayer(x, "On");
+    delay(delayTime);
+  }
+  for (int x=0; x<=4; x++) {
+    SetLayer(x, "Off");
+    delay(delayTime);
+  }
+}
+  
+void ColumnDown (int targetLed, int delayTime) {
+  //Accepts a layer 5 led and a delay and crawls down
+  FullReset();
+  led(targetLed);
+  delay(delayTime);
+  for (int x=3; x>=0; x--) {
+    SetLayer(x, "On");
+    delay(delayTime);
+  }
+  for (int x=4; x>=0; x--) {
+    SetLayer(x, "Off");
+    delay(delayTime);
+  }
+}
+
 
 int WalkSpiral(int delayTime) {
   //Starting at 0, spiral around the perimeter spiraling in to the middle then unwind on next layer
@@ -199,7 +254,7 @@ void Status() {
  
 void led(int targetLed) {
   //Calculate which layer needs to be used
-  //Divide the targetLED by the total number of columns in a layer
+  //Divide the targetLed by the total number of columns in a layer
   //Since it will round down to the nearest whole number, this gives the layer
   int targetLayer = targetLed / columnsTotal;
   //Subtract the number of columns in other layers
@@ -213,47 +268,60 @@ void led(int targetLed) {
   int targetDecoderInput = targetColumn % 8;
   //Ensure everything is off before turning on a single LED
   FullReset();
+  //Set the decoder output to the correct pin
+  SetDecoder(targetDecoder, targetDecoderInput);
+  //Special handling for column 25 as it is directly connected to Arduino and not a line decoder
+  if (targetColumn == 24) {
+    digitalWrite(col25, HIGH);
+  }
+
+  //Enable power to the target layer
+//  digitalWrite(Layer[targetLayer], HIGH);
+  SetLayer(targetLayer, "On");
+}
+ 
+void SetDecoder (int targetDecoder, int targetOutput) {
+  //Receives the decoder to set, and what output to enable
+  
   //If the A input of decoder (first binary digit) needs to be high (or 1)
-  if (targetDecoderInput == 1 || targetDecoderInput == 3 || targetDecoderInput == 5 || targetDecoderInput == 7) {
+  if (targetOutput == 1 || targetOutput == 3 || targetOutput == 5 || targetOutput == 7) {
     digitalWrite(DecoderPinA[targetDecoder], HIGH);
   }
   else {
     digitalWrite(DecoderPinA[targetDecoder], LOW);
   }
   //If the B input of decoder (second binary digit) needs to be high (or 1)
-  if (targetDecoderInput == 2 || targetDecoderInput == 3 || targetDecoderInput == 6 || targetDecoderInput == 7) {
+  if (targetOutput == 2 || targetOutput == 3 || targetOutput == 6 || targetOutput == 7) {
     digitalWrite(DecoderPinB[targetDecoder], HIGH);
   }
   else {
     digitalWrite(DecoderPinB[targetDecoder], LOW);
   }
   //If the C input of decoder (third binary digit) needs to be high (or 1)
-  if (targetDecoderInput >= 4) {
+  if (targetOutput >= 4) {
     digitalWrite(DecoderPinC[targetDecoder], HIGH);
   }
   else {
     digitalWrite(DecoderPinC[targetDecoder], LOW);
   }
-  //Special handling for column 25 as it is directly connected to Arduino and not a line decoder
-  if (targetColumn == 24) {
-    digitalWrite(col25, HIGH);
-  }
   //Ensuare that the target decoder is enabled
   digitalWrite(EnableDecoder[targetDecoder], HIGH);
-  //Enable power to the target layer
-  digitalWrite(Layer[targetLayer], HIGH);
 }
- 
+
+void SetLayer(int targetLayer, String desiredStatus) {
+  //Accepts a layer number and On or Off to make apporopriate changes
+  if (desiredStatus == "On")   digitalWrite(Layer[targetLayer], HIGH);
+  if (desiredStatus == "Off")   digitalWrite(Layer[targetLayer], LOW);
+}
 
 void FullReset() {
   //Turn off all columns and layers
-  //Used when lightning individual LED
-  //Potential bug/enhancement is that cannot have 2 concurrent LEDs
+  //Used when lighting individual LED
   //Could add logic to check if an existing LED on column or layer is lit and leave it
   for (int x = 0; x<=2; x++) {
-    digitalWrite(DecoderPinA[x], LOW);
-    digitalWrite(DecoderPinB[x], LOW);
-    digitalWrite(DecoderPinC[x], LOW);
+//    digitalWrite(DecoderPinA[x], LOW);
+//    digitalWrite(DecoderPinB[x], LOW);
+//    digitalWrite(DecoderPinC[x], LOW);
     digitalWrite(EnableDecoder[x], LOW);
   }
   for (int x = 0; x<=5; x++) {
