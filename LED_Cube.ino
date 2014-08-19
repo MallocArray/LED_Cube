@@ -33,20 +33,25 @@ void setup() {
 
 void loop() {
   //Main loop for various patterns
-/*
-  LayerWalk(50);
-  WalkLayerUpDown(50);
-  WalkLayerUpDownReverse(50);
-  for (int x=0; x <= 40; x++) RandomLed(150); //40 random LEDs
-  for (int x=0; x <= 4; x++) { 
+
+  LayerWalk(25);
+  WalkLayerUpDown(25);
+  WalkLayerUpDownReverse(25);
+  WalkSpiral(25);
+  for (int x=0; x <= 30; x++) RandomLed(150); //30 random LEDs
+  for (int x=0; x <= 2; x++) { 
     ColumnUpDown(random(25), 150); //Random up and down the column
     ColumnUp(random(25), 150); //Random up the column
     ColumnDown(random(100, 125), 150); //Random down the column
   }
   CrawlFullCube(1000);
   FillFullCube(2000);
-*/
-  WalkSpiral(100); //Still needs work.  Break out spiral in and out
+  //DesignCube(2000);  Buggy.  Depends on what things were at before starting function
+  LightFullCube(5000);
+
+//  WalkSpiral(100); //Still needs work.  Break out spiral in and out
+
+
 
 //  LayerByLayerUp(250); //Will need POV to allow all decoder pins to be on
 //  LayerByLayerDown(250); //Will need POV to allow all decoder pins to be on
@@ -54,6 +59,66 @@ void loop() {
 //  ColumnByColumnToEmpty(250);
 }
 
+void DesignCube(int RunTime) {
+  long StartTime = millis();
+  unsigned long CurrentTime = millis();
+  int DelayTime =1;
+  int Frames = 5;
+  led(0);
+//  FullReset();
+  while (CurrentTime - StartTime <= RunTime) {
+    //Frame 1
+    //FullReset();
+//    for (int x=0; x<=2; x++) digitalWrite(EnableDecoder[x], LOW);  
+    digitalWrite(EnableDecoder[0], LOW);
+    digitalWrite(EnableDecoder[1], LOW);
+    digitalWrite(EnableDecoder[2], LOW);
+    for (int x=0; x<=4; x++) SetLayer(x, "On");
+    //SetLayer(0,"On");
+    //SetLayer(1,"On");
+    //SetLayer(2,"On");
+    //SetLayer(3,"On");
+    //SetLayer(4,"On");
+    digitalWrite(EnableDecoder[1], LOW);    
+    SetDecoder(0,0);
+    delay(DelayTime);
+    SetDecoder(0,4);
+    SetDecoder(2,4);
+    digitalWrite(col25, HIGH);
+    delay(DelayTime);  
+    //Frame2;
+    SetLayer(1,"Off");
+    SetLayer(2,"Off");
+    SetLayer(3,"Off");
+    SetDecoder(0,1);
+    SetDecoder(1,1);
+    SetDecoder(2,3);
+    digitalWrite(col25, LOW);
+    delay(DelayTime);
+    //Frame 3
+    SetDecoder(0,2);
+    SetDecoder(1,2);
+    SetDecoder(2,4);
+    digitalWrite(col25, HIGH);
+    delay(DelayTime);
+    //Frame 4
+    SetDecoder(0,3);
+    SetDecoder(1,6);
+    SetDecoder(2,5);
+    digitalWrite(col25, LOW);
+    delay(DelayTime);
+    //Frame 5
+    SetDecoder(0,5);
+    SetDecoder(1,7);
+    SetDecoder(2,6);
+    delay(DelayTime);
+    //Frame 6
+    SetDecoder(2,7);
+    delay(DelayTime);
+    CurrentTime = millis();
+  }
+  //FullReset();
+}
 
 void CrawlFullCube(int RunTime) {
   //Lights all LEDs on a single layer, crawling up and down the full cube
@@ -76,27 +141,21 @@ void CrawlFullCubeUp (int RunTime) {
     if (x !=0) SetLayer(x-1, "Off");
     SetLayer(x, "On");
     CyclePins(RunTime/5);
-
   }
 }
 
 void CrawlFullCubeDown (int RunTime) {
   //Lights all LEDs on a single layer at a time, crawling down the cube
-  long StartTime = millis();
-  unsigned long CurrentTime = millis();
   for (int x=4; x>=0; x--) {
     if (x !=4) SetLayer(x+1, "Off");
     SetLayer(x, "On");
     CyclePins(RunTime/5);
-
   }
 }
 
 
 void FillFullCubeDown (int RunTime) {
   //Lights all LED on the entire cube for a duration of milliseconds emptying down the layers
-  long StartTime = millis();
-  unsigned long CurrentTime = millis();
   for (int x=4; x>=0; x--) {
     SetLayer(x, "Off");
     CyclePins(RunTime/5);
@@ -106,8 +165,6 @@ void FillFullCubeDown (int RunTime) {
 
 void FillFullCubeUp (int RunTime) {
   //Lights all LED on the entire cube for a duration of milliseconds filling up the layers
-  long StartTime = millis();
-  unsigned long CurrentTime = millis();
   int CurrentLayer = 0;
   for (int x=0; x<=4; x++) {
     SetLayer(x, "On");
@@ -327,11 +384,6 @@ void WalkLayerUpDown(int delayTime) {
   }
 }
 
-
-
-
-
-
 void Status() {
   int layerstatus;
   for (int i=0; i<3; i++) {
@@ -374,45 +426,41 @@ void led(int targetLed) {
   //Calculate the input for the targetDecoder
   //The decoder will accept this on 3 pins as binary to output to 8 pins
   int targetDecoderInput = targetColumn % 8;
-  //Ensure everything is off before turning on a single LED
-  FullReset();
+  //Turn off unneeded decoders and layers
+//  FullReset();
+  
+  
+  for (int x = 0; x<=2; x++) {
+    if (x != targetDecoder) 
+    //Except for the targetDecoder, turn all others off
+    digitalWrite(EnableDecoder[x], LOW);
+  }
+  for (int x = 0; x<=5; x++) {
+    //Turn off other layers not needed
+    if (x != targetLayer) digitalWrite(Layer[x], LOW);
+  }
+  
   //Set the decoder output to the correct pin
   SetDecoder(targetDecoder, targetDecoderInput);
-  //Special handling for column 25 as it is directly connected to Arduino and not a line decoder
-  if (targetColumn == 24) {
-    digitalWrite(col25, HIGH);
-  }
-
+  //Special handling for column 24 as it is directly connected to Arduino and not a line decoder
+  if (targetColumn == 24) digitalWrite(col25, HIGH);
+  else digitalWrite(col25, LOW);
   //Enable power to the target layer
-//  digitalWrite(Layer[targetLayer], HIGH);
   SetLayer(targetLayer, "On");
 }
  
 void SetDecoder (int targetDecoder, int targetOutput) {
   //Receives the decoder to set, and what output to enable
-  
   //If the A input of decoder (first binary digit) needs to be high (or 1)
-  if (targetOutput == 1 || targetOutput == 3 || targetOutput == 5 || targetOutput == 7) {
-    digitalWrite(DecoderPinA[targetDecoder], HIGH);
-  }
-  else {
-    digitalWrite(DecoderPinA[targetDecoder], LOW);
-  }
+  if (targetOutput == 1 || targetOutput == 3 || targetOutput == 5 || targetOutput == 7) digitalWrite(DecoderPinA[targetDecoder], HIGH);
+  else digitalWrite(DecoderPinA[targetDecoder], LOW);
   //If the B input of decoder (second binary digit) needs to be high (or 1)
-  if (targetOutput == 2 || targetOutput == 3 || targetOutput == 6 || targetOutput == 7) {
-    digitalWrite(DecoderPinB[targetDecoder], HIGH);
-  }
-  else {
-    digitalWrite(DecoderPinB[targetDecoder], LOW);
-  }
+  if (targetOutput == 2 || targetOutput == 3 || targetOutput == 6 || targetOutput == 7) digitalWrite(DecoderPinB[targetDecoder], HIGH);
+  else digitalWrite(DecoderPinB[targetDecoder], LOW);
   //If the C input of decoder (third binary digit) needs to be high (or 1)
-  if (targetOutput >= 4) {
-    digitalWrite(DecoderPinC[targetDecoder], HIGH);
-  }
-  else {
-    digitalWrite(DecoderPinC[targetDecoder], LOW);
-  }
-  //Ensuare that the target decoder is enabled
+  if (targetOutput >= 4) digitalWrite(DecoderPinC[targetDecoder], HIGH);
+  else digitalWrite(DecoderPinC[targetDecoder], LOW);
+  //Ensure that the target decoder is enabled
   digitalWrite(EnableDecoder[targetDecoder], HIGH);
 }
 
@@ -426,15 +474,8 @@ void FullReset() {
   //Turn off all columns and layers
   //Used when lighting individual LED
   //Could add logic to check if an existing LED on column or layer is lit and leave it
-  for (int x = 0; x<=2; x++) {
-//    digitalWrite(DecoderPinA[x], LOW);
-//    digitalWrite(DecoderPinB[x], LOW);
-//    digitalWrite(DecoderPinC[x], LOW);
-    digitalWrite(EnableDecoder[x], LOW);
-  }
-  for (int x = 0; x<=5; x++) {
-    digitalWrite(Layer[x], LOW);
-  }
+  for (int x = 0; x<=2; x++) digitalWrite(EnableDecoder[x], LOW);
+  for (int x = 0; x<=5; x++) digitalWrite(Layer[x], LOW);
   digitalWrite(col25, LOW);
 }
 
