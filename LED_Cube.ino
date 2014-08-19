@@ -37,21 +37,129 @@ void loop() {
   LayerWalk(50);
   WalkLayerUpDown(50);
   WalkLayerUpDownReverse(50);
-*/
-//  WalkSpiral(100); //Still needs work
-  for (int x=0; x <= 40; x++) RandomLed(150); 
-  for (int x=0; x <= 10; x++) {
-    ColumnUpDown(random(25), 150);
-    ColumnUp(random(25), 150);
-    ColumnDown(random(100, 125), 150);
+  for (int x=0; x <= 40; x++) RandomLed(150); //40 random LEDs
+  for (int x=0; x <= 4; x++) { 
+    ColumnUpDown(random(25), 150); //Random up and down the column
+    ColumnUp(random(25), 150); //Random up the column
+    ColumnDown(random(100, 125), 150); //Random down the column
   }
-  delay(5000);
+  CrawlFullCube(1000);
+  FillFullCube(2000);
+*/
+  WalkSpiral(100); //Still needs work.  Break out spiral in and out
 
 //  LayerByLayerUp(250); //Will need POV to allow all decoder pins to be on
 //  LayerByLayerDown(250); //Will need POV to allow all decoder pins to be on
 //  ColumnByColumnToFull(250);
 //  ColumnByColumnToEmpty(250);
 }
+
+
+void CrawlFullCube(int RunTime) {
+  //Lights all LEDs on a single layer, crawling up and down the full cube
+  CrawlFullCubeUp(RunTime/2);
+  CrawlFullCubeDown(RunTime/2);
+}
+
+void FillFullCube(int RunTime) {
+  //Lights all LEDs in the cube, filling up the cube and then down
+  FullReset();
+  FillFullCubeUp(RunTime/2);
+  FillFullCubeDown(RunTime/2);
+}
+
+void CrawlFullCubeUp (int RunTime) {
+  //Lights all LEDs on a single layer at a time, crawling up the cube
+  long StartTime = millis();
+  unsigned long CurrentTime = millis();
+  for (int x=0; x<=4; x++) {
+    if (x !=0) SetLayer(x-1, "Off");
+    SetLayer(x, "On");
+    CyclePins(RunTime/5);
+
+  }
+}
+
+void CrawlFullCubeDown (int RunTime) {
+  //Lights all LEDs on a single layer at a time, crawling down the cube
+  long StartTime = millis();
+  unsigned long CurrentTime = millis();
+  for (int x=4; x>=0; x--) {
+    if (x !=4) SetLayer(x+1, "Off");
+    SetLayer(x, "On");
+    CyclePins(RunTime/5);
+
+  }
+}
+
+
+void FillFullCubeDown (int RunTime) {
+  //Lights all LED on the entire cube for a duration of milliseconds emptying down the layers
+  long StartTime = millis();
+  unsigned long CurrentTime = millis();
+  for (int x=4; x>=0; x--) {
+    SetLayer(x, "Off");
+    CyclePins(RunTime/5);
+  }
+}
+
+
+void FillFullCubeUp (int RunTime) {
+  //Lights all LED on the entire cube for a duration of milliseconds filling up the layers
+  long StartTime = millis();
+  unsigned long CurrentTime = millis();
+  int CurrentLayer = 0;
+  for (int x=0; x<=4; x++) {
+    SetLayer(x, "On");
+    CyclePins(RunTime/5);
+  }
+}
+
+
+void CyclePins(int RunTime) {
+  //Cycles through all Decoder pins for a specified amount of milliseconds
+  for (int x=0; x<=3; x++) digitalWrite(EnableDecoder[x], HIGH);
+  long StartTime = millis();
+  unsigned long CurrentTime = millis();
+  //Run through this function for the specified amount of time
+  while (CurrentTime - StartTime <= RunTime) {
+    //Cycle through each Decoder output, at a specified delay
+    for (int x=0; x<=7; x++) {
+      digitalWrite(col25, HIGH); //To keep the last column in sync, it cycles off an on like the others
+      SetDecoder(0, x);
+      SetDecoder(1, x);
+      SetDecoder(2, x);
+      digitalWrite(col25, LOW);
+      delayMicroseconds(250); //When using 1 millisecond, the 25th column looks dimmer
+    }
+    CurrentTime = millis();
+  }
+}
+
+void LightFullCube (int RunTime) {
+  //Lights all LED on the entire cube for a duration of milliseconds
+  long StartTime = millis();
+  unsigned long CurrentTime = millis();
+  for (int x=0; x<=4; x++) SetLayer(x, "On"); //Turn all layers on
+  //Run through this function for the specified amount of time
+  CyclePins(RunTime);
+  
+  /*
+  while (CurrentTime - StartTime <= RunTime) {
+    //Cycle through each Decoder output, at a specified delay
+    for (int x=0; x<=7; x++) {
+      digitalWrite(col25, HIGH); //To keep the last column in sync, it cycles off an on like the others
+      SetDecoder(0, x);
+      SetDecoder(1, x);
+      SetDecoder(2, x);
+      digitalWrite(col25, LOW);
+      delayMicroseconds(250); //When using 1 millisecond, the 25th column looks dimmer
+    }
+    CurrentTime = millis();
+  }
+  */
+}
+
 
 void RandomLed (int delayTime) {
   led(random(125));
