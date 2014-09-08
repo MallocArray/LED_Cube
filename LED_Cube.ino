@@ -77,6 +77,8 @@ void loop() {
 //  ColumnByColumnToEmpty(250);
 }
 
+
+
 void FadeLed(int targetLed, int runTime, int minBrightness, int maxBrightness) {
   //Calculate which layer needs to be used
   //Divide the targetLed by the total number of columns in a layer
