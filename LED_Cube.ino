@@ -36,7 +36,7 @@ void setup() {
     digitalWrite(ledPins[thisPin], LOW);  
   }
   delay(1);
-//  Serial.begin(9600);
+  //Serial.begin(9600);
 }
 
 
@@ -59,14 +59,15 @@ void loop() {
   LayerWalk(1);
   CrawlFullCube(1000);
   FillFullCube(2000);
-  //DesignCube(2000);  Buggy.  Depends on what things were at before starting function
-  */
-  //delay(0);
+  for (int x=0; x<=15; x++) FadeLed(random(125));
   LightFullCube(5000);
+  */
+  //DesignCube(2000);  //Buggy.  Depends on what things were at before starting function
+  LightFullCube(3000);
+  DesignPerim(3000);
   //FullReset();
   
   //for (int x=0; x<=15; x++) FadeLed(random(125));
-//  WalkSpiral(100); //Still needs work.  Break out spiral in and out
   //FadeLed(random(125));
   //delay(3000);
 
@@ -78,6 +79,65 @@ void loop() {
 }
 
 
+void DesignPerim(unsigned long RunTime) {
+  //Creates a design of the cube perimeter only, using Boolean array to indicate which leds to use
+  boolean frame[5][5] = 
+  {
+    {1, 0, 1, 0, 1},
+    {0, 1, 0, 1, 0},
+    {1, 0, 1, 0, 1},
+    {0, 1, 0, 1, 0},
+    {1, 0, 1, 0, 1}
+  };
+  boolean frameDecoder [4][8];
+ 
+  //Move data from human logical frame array to an array of data for each decoder
+  //d = DecoderData location, x = Frame array location
+  //Move column 0-4 into Decoder 0 array
+  for (int d=0; d<=4; d++) frameDecoder[0][d] = frame[4][d];
+  //Move column 5-7 into Decoder 0
+  for (int d=5, x=0; x<=2; d++, x++) frameDecoder[0][d] = frame[3][x];
+  //column 8-9 into Decoder 1
+  for (int d=0, x=3; x<=4; d++, x++) frameDecoder[1][d] = frame[3][x];
+  //Column 10-14 into Decoder 1
+  for (int d=2, x=0; x<=4; d++, x++) frameDecoder[1][d] = frame[2][x];
+  //Column 15 into Decoder 1
+  for (int d=7, x=0; x<=0; d++, x++) frameDecoder[1][d] = frame[1][x];  
+  //Column 16-19 into Decoder 2
+  for (int d=0, x=1; x<=4; d++, x++) frameDecoder[2][d] = frame[1][x];
+  //Column 20-23 into Decoder 3
+  for (int d=4, x=0; x<=3; d++, x++) frameDecoder[2][d] = frame[0][x];  
+  //Column 24 into Decoder 4, or stand-alone pin
+  for (int d=0, x=4; x<=4; d++, x++) frameDecoder[3][d] = frame[0][x];  
+  //Fill rest of Decoder 3 with zero
+  for (int d=1; d<=7; d++) frameDecoder[3][d] = 0;
+
+  SetLayer(0, "On");
+  SetLayer(1, "On");
+  SetLayer(2, "On");
+  SetLayer(3, "On");
+  SetLayer(4, "On");
+
+  unsigned long StartTime = millis();
+  unsigned long CurrentTime = millis();
+  //Run through this function for the specified amount of time
+  while (CurrentTime - StartTime <= RunTime) {
+  
+    //Cycle through each element to see if the decoder output needs to be on, and if so, activate it  
+    for (int x=0; x<=7; x++) {
+      for (int d=0; d<=3; d++) {
+        if (frameDecoder[d][x] == 1) SetDecoder(d, x);
+          else digitalWrite(EnableDecoder[d], LOW);
+//        if (x==0 && d==3 && frameDecoder[d][x] == 1) digitalWrite(col25, HIGH);
+        if (frameDecoder[3][x] == 1) digitalWrite(col25, HIGH);
+//        if (x==0 && d==3 && frameDecoder[d][x] == 1) digitalWrite(col25, HIGH);
+        else digitalWrite(col25, LOW);
+      }
+    }
+  CurrentTime = millis();
+  }
+}
+  
 
 void FadeLed(int targetLed, int runTime, int minBrightness, int maxBrightness) {
   //Calculate which layer needs to be used
@@ -135,8 +195,9 @@ void FadeLayer(int targetLayer, int runTime, int minBrightness, int maxBrightnes
   } 
 }
 
-
+/*
 void DesignCube(int RunTime) {
+  //Supposed to light up a design of only the peremiter of the cube.  Very buggy and doesn't like the FullReset function at all
   long StartTime = millis();
   unsigned long CurrentTime = millis();
   int DelayTime =1;
@@ -196,7 +257,7 @@ void DesignCube(int RunTime) {
   }
   //FullReset();
 }
-
+*/
 void CrawlFullCube(int RunTime) {
   //Lights all LEDs on a single layer, crawling up and down the full cube
   CrawlFullCubeUp(RunTime/2);
@@ -212,8 +273,8 @@ void FillFullCube(int RunTime) {
 
 void CrawlFullCubeUp (int RunTime) {
   //Lights all LEDs on a single layer at a time, crawling up the cube
-  long StartTime = millis();
-  unsigned long CurrentTime = millis();
+  //long StartTime = millis();
+  //unsigned long CurrentTime = millis();
   for (int x=0; x<=4; x++) {
     if (x !=0) SetLayer(x-1, "Off");
     SetLayer(x, "On");
