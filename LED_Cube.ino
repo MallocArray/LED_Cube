@@ -36,7 +36,8 @@ void setup() {
     digitalWrite(ledPins[thisPin], LOW);  
   }
   delay(1);
-  //Serial.begin(9600);
+  Serial.begin(9600);
+  Serial.println("Setup Done");
 }
 
 
@@ -63,8 +64,33 @@ void loop() {
   LightFullCube(5000);
   */
   //DesignCube(2000);  //Buggy.  Depends on what things were at before starting function
-  LightFullCube(3000);
-  DesignPerim(3000);
+  //LightFullCube(3000);
+  /*
+  SetDecoder(0, 0);
+    SetDecoder(1, 0);
+      SetDecoder(2, 0);
+  SetLayer(0, "On");
+  SetLayer(1, "On");
+  SetLayer(2, "On");
+  SetLayer(3, "On");
+  SetLayer(4, "On");
+    delay(500);
+  digitalWrite(EnableDecoder[0], LOW);
+    delay(500);
+  digitalWrite(EnableDecoder[1], LOW);
+    delay(500);
+  digitalWrite(EnableDecoder[2], LOW);
+  
+  delay(500);
+  //led(50);
+  Serial.println("Pass Complete");
+  delay(500);
+  //led(75);
+  delay(500);
+  */
+  
+  DesignPerim(5000);
+  DesignCube(5000);
   //FullReset();
   
   //for (int x=0; x<=15; x++) FadeLed(random(125));
@@ -81,6 +107,7 @@ void loop() {
 
 void DesignPerim(unsigned long RunTime) {
   //Creates a design of the cube perimeter only, using Boolean array to indicate which leds to use
+  Serial.println("Start DesignPerim");
   boolean frame[5][5] = 
   {
     {1, 0, 1, 0, 1},
@@ -112,11 +139,12 @@ void DesignPerim(unsigned long RunTime) {
   //Fill rest of Decoder 3 with zero
   for (int d=1; d<=7; d++) frameDecoder[3][d] = 0;
 
-  SetLayer(0, "On");
+  //Seems like a power issue when all 5 layers are on at the same time.  By only enabling 3, it is stable
+  //SetLayer(0, "On");
   SetLayer(1, "On");
   SetLayer(2, "On");
   SetLayer(3, "On");
-  SetLayer(4, "On");
+  //SetLayer(4, "On");
 
   unsigned long StartTime = millis();
   unsigned long CurrentTime = millis();
@@ -124,18 +152,22 @@ void DesignPerim(unsigned long RunTime) {
   while (CurrentTime - StartTime <= RunTime) {
   
     //Cycle through each element to see if the decoder output needs to be on, and if so, activate it  
-    for (int x=0; x<=7; x++) {
-      for (int d=0; d<=3; d++) {
-        if (frameDecoder[d][x] == 1) SetDecoder(d, x);
-          else digitalWrite(EnableDecoder[d], LOW);
-//        if (x==0 && d==3 && frameDecoder[d][x] == 1) digitalWrite(col25, HIGH);
-        if (frameDecoder[3][x] == 1) digitalWrite(col25, HIGH);
-//        if (x==0 && d==3 && frameDecoder[d][x] == 1) digitalWrite(col25, HIGH);
-        else digitalWrite(col25, LOW);
+    for (int output=0; output<=7; output++) {
+      for (int decoder=0; decoder<=3; decoder++) {
+        if (frameDecoder[decoder][output] == 1) SetDecoder(decoder, output);
+          else {
+            //digitalWrite(EnableDecoder[decoder], LOW);
+            if (decoder <=2 ) digitalWrite(EnableDecoder[decoder], LOW);
+            if (decoder == 3) digitalWrite(col25, LOW);
+          }
+        //if (frameDecoder[3][output] == 1) digitalWrite(col25, HIGH);
+        //else digitalWrite(col25, LOW);
       }
     }
   CurrentTime = millis();
+  //Serial.println(millis());
   }
+  Serial.println("Finish DesignPerim");
 }
   
 
@@ -195,28 +227,28 @@ void FadeLayer(int targetLayer, int runTime, int minBrightness, int maxBrightnes
   } 
 }
 
-/*
+
 void DesignCube(int RunTime) {
   //Supposed to light up a design of only the peremiter of the cube.  Very buggy and doesn't like the FullReset function at all
   long StartTime = millis();
   unsigned long CurrentTime = millis();
   int DelayTime =1;
   int Frames = 5;
-  led(0);
-//  FullReset();
+//  led(0);
+  FullReset();
   while (CurrentTime - StartTime <= RunTime) {
     //Frame 1
-    //FullReset();
-//    for (int x=0; x<=2; x++) digitalWrite(EnableDecoder[x], LOW);  
-    digitalWrite(EnableDecoder[0], LOW);
-    digitalWrite(EnableDecoder[1], LOW);
-    digitalWrite(EnableDecoder[2], LOW);
-    for (int x=0; x<=4; x++) SetLayer(x, "On");
-    //SetLayer(0,"On");
+    FullReset();
+    for (int x=0; x<=2; x++) digitalWrite(EnableDecoder[x], LOW);  
+    //digitalWrite(EnableDecoder[0], LOW);
+    //digitalWrite(EnableDecoder[1], LOW);
+    //digitalWrite(EnableDecoder[2], LOW);
+    //for (int x=0; x<=4; x++) SetLayer(x, "On");
+    SetLayer(0,"On");
     //SetLayer(1,"On");
     //SetLayer(2,"On");
-    //SetLayer(3,"On");
-    //SetLayer(4,"On");
+    SetLayer(3,"On");
+    SetLayer(4,"On");
     digitalWrite(EnableDecoder[1], LOW);    
     SetDecoder(0,0);
     delay(DelayTime);
@@ -255,9 +287,9 @@ void DesignCube(int RunTime) {
     delay(DelayTime);
     CurrentTime = millis();
   }
-  //FullReset();
+  FullReset();
 }
-*/
+
 void CrawlFullCube(int RunTime) {
   //Lights all LEDs on a single layer, crawling up and down the full cube
   CrawlFullCubeUp(RunTime/2);
@@ -589,17 +621,20 @@ void led(int targetLed) {
  
 void SetDecoder (int targetDecoder, int targetOutput) {
   //Receives the decoder to set, and what output to enable
-  //If the A input of decoder (first binary digit) needs to be high (or 1)
-  if (targetOutput == 1 || targetOutput == 3 || targetOutput == 5 || targetOutput == 7) digitalWrite(DecoderPinA[targetDecoder], HIGH);
-  else digitalWrite(DecoderPinA[targetDecoder], LOW);
-  //If the B input of decoder (second binary digit) needs to be high (or 1)
-  if (targetOutput == 2 || targetOutput == 3 || targetOutput == 6 || targetOutput == 7) digitalWrite(DecoderPinB[targetDecoder], HIGH);
-  else digitalWrite(DecoderPinB[targetDecoder], LOW);
-  //If the C input of decoder (third binary digit) needs to be high (or 1)
-  if (targetOutput >= 4) digitalWrite(DecoderPinC[targetDecoder], HIGH);
-  else digitalWrite(DecoderPinC[targetDecoder], LOW);
-  //Ensure that the target decoder is enabled
-  digitalWrite(EnableDecoder[targetDecoder], HIGH);
+  if (targetDecoder == 3 && targetOutput == 0) digitalWrite(col25, HIGH);
+  else {
+    //If the A input of decoder (first binary digit) needs to be high (or 1)
+    if (targetOutput == 1 || targetOutput == 3 || targetOutput == 5 || targetOutput == 7) digitalWrite(DecoderPinA[targetDecoder], HIGH);
+    else digitalWrite(DecoderPinA[targetDecoder], LOW);
+    //If the B input of decoder (second binary digit) needs to be high (or 1)
+    if (targetOutput == 2 || targetOutput == 3 || targetOutput == 6 || targetOutput == 7) digitalWrite(DecoderPinB[targetDecoder], HIGH);
+    else digitalWrite(DecoderPinB[targetDecoder], LOW);
+    //If the C input of decoder (third binary digit) needs to be high (or 1)
+    if (targetOutput >= 4) digitalWrite(DecoderPinC[targetDecoder], HIGH);
+    else digitalWrite(DecoderPinC[targetDecoder], LOW);
+    //Ensure that the target decoder is enabled
+    digitalWrite(EnableDecoder[targetDecoder], HIGH);
+  }
 }
 
 void SetLayer(int targetLayer, String desiredStatus) {
