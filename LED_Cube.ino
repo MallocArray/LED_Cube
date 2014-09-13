@@ -46,23 +46,23 @@ void setup() {
 
 void loop() {
   //Main loop for various patterns
-/*
+
   LayerWalk(25);
   WalkLayerUpDown(25);
   WalkLayerUpDownReverse(25);
-  WalkSpiral(25);
+  WalkSpiral(50);
   for (int x=0; x <= 30; x++) RandomLed(150); //30 random LEDs
   for (int x=0; x <= 2; x++) { 
     ColumnUpDown(random(25), 150); //Random up and down the column
     ColumnUp(random(25), 150); //Random up the column
     ColumnDown(random(100, 125), 150); //Random down the column
   }
-  LayerWalk(1);
+  for (int x=0; x<15; x++) LayerWalk(1);
   CrawlFullCube(1000);
   FillFullCube(2000);
   for (int x=0; x<=15; x++) FadeLed(random(125));
   LightFullCube(5000);
-  */
+  
   //DesignCube(2000);  //Buggy.  Depends on what things were at before starting function
   //LightFullCube(3000);
   /*
@@ -89,8 +89,8 @@ void loop() {
   delay(500);
   */
   
-  DesignPerim(5000);
-  DesignCube(5000);
+  //DesignPerim(5000);
+  //DesignCube(5000);
   //FullReset();
   
   //for (int x=0; x<=15; x++) FadeLed(random(125));
@@ -292,6 +292,7 @@ void DesignCube(int RunTime) {
 
 void CrawlFullCube(int RunTime) {
   //Lights all LEDs on a single layer, crawling up and down the full cube
+  FullReset();
   CrawlFullCubeUp(RunTime/2);
   CrawlFullCubeDown(RunTime/2);
 }
