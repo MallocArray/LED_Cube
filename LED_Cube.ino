@@ -36,7 +36,7 @@ void setup() {
     digitalWrite(ledPins[thisPin], LOW);  
   }
   delay(1);
-  Serial.begin(9600);
+  //Serial.begin(9600);
   Serial.println("Setup Done");
 }
 
@@ -46,22 +46,75 @@ void setup() {
 
 void loop() {
   //Main loop for various patterns
-
-  LayerWalk(25);
-  WalkLayerUpDown(25);
-  WalkLayerUpDownReverse(25);
-  WalkSpiral(50);
-  for (int x=0; x <= 30; x++) RandomLed(150); //30 random LEDs
-  for (int x=0; x <= 2; x++) { 
-    ColumnUpDown(random(25), 150); //Random up and down the column
-    ColumnUp(random(25), 150); //Random up the column
-    ColumnDown(random(100, 125), 150); //Random down the column
+  int pattern = random(16);
+  //pattern=15;
+  switch(pattern) {
+    case 0: 
+      LayerWalk(25);
+      break;
+     case 1: 
+       WalkLayerUpDown(25);
+       break;
+     case 2:
+       WalkLayerUpDownReverse(25);
+       break;
+     case 3:
+       WalkSpiral(50);
+       break;
+     case 4:
+       for (int x=0; x <= 30; x++) RandomLed(150); //30 random LEDs
+       break;
+     case 5:
+       for (int x=0; x <= 2; x++) ColumnUpDown(random(25), 150); //Random up and down the column
+       break;
+     case 6:
+       for (int x=0; x <= 2; x++) ColumnUp(random(25), 150); //Random up the column
+       break;
+     case 7:
+       for (int x=0; x <= 2; x++) ColumnDown(random(100, 125), 150); //Random down the column
+       break;
+     case 8:
+       CrawlFullCube(1000);
+       break;
+     case 9:
+       FillFullCube(2000);
+       break;
+     case 10:
+       for (int x=0; x<=5; x++) FadeLed(random(125));
+       break;
+     case 11:
+       for (int x=0; x<20; x++) LayerWalk(1);
+       break;
+     case 12:
+       LightFullCube(5000);
+       break;
+     case 13:
+       DesignCheckerboard(5000);
+       break;
+     case 14:
+       DesignPerim(5000);
+       break;
+     case 15:
+         for (int x=0; x<2500; x++) RandomLed(1);
+         break;
+    case 9000: 
+      LayerWalk(25);
+      WalkLayerUpDown(25);
+      WalkLayerUpDownReverse(25);
+      WalkSpiral(50);
+      for (int x=0; x <= 30; x++) RandomLed(150); //30 random LEDs
+      for (int x=0; x <= 2; x++) { 
+        ColumnUpDown(random(25), 150); //Random up and down the column
+        ColumnUp(random(25), 150); //Random up the column
+        ColumnDown(random(100, 125), 150); //Random down the column
+      }
+      for (int x=0; x<15; x++) LayerWalk(1);
+      CrawlFullCube(1000);
+      FillFullCube(2000);
+      for (int x=0; x<=15; x++) FadeLed(random(125));
+      LightFullCube(5000);
+      break;
   }
-  for (int x=0; x<15; x++) LayerWalk(1);
-  CrawlFullCube(1000);
-  FillFullCube(2000);
-  for (int x=0; x<=15; x++) FadeLed(random(125));
-  LightFullCube(5000);
   
   //DesignCube(2000);  //Buggy.  Depends on what things were at before starting function
   //LightFullCube(3000);
@@ -104,70 +157,143 @@ void loop() {
 //  ColumnByColumnToEmpty(250);
 }
 
-
 void DesignPerim(unsigned long RunTime) {
-  //Creates a design of the cube perimeter only, using Boolean array to indicate which leds to use
-  Serial.println("Start DesignPerim");
-  boolean frame[5][5] = 
+  boolean frame[5][5][5] = 
   {
-    {1, 0, 1, 0, 1},
-    {0, 1, 0, 1, 0},
-    {1, 0, 1, 0, 1},
-    {0, 1, 0, 1, 0},
-    {1, 0, 1, 0, 1}
+    {//Layer 0
+      {1, 1, 1, 1, 1},
+      {1, 0, 0, 0, 1},
+      {1, 0, 0, 0, 1},
+      {1, 0, 0, 0, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 1
+      {1, 0, 0, 0, 1},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 1}
+    },
+    {//Layer 2
+      {1, 0, 0, 0, 1},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 1}
+    },
+    {//Layer 3
+      {1, 0, 0, 0, 1},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 1}
+    },
+    {//Layer 4
+      {1, 1, 1, 1, 1},
+      {1, 0, 0, 0, 1},
+      {1, 0, 0, 0, 1},
+      {1, 0, 0, 0, 1},
+      {1, 1, 1, 1, 1}
+    }
   };
-  boolean frameDecoder [4][8];
- 
-  //Move data from human logical frame array to an array of data for each decoder
-  //d = DecoderData location, x = Frame array location
-  //Move column 0-4 into Decoder 0 array
-  for (int d=0; d<=4; d++) frameDecoder[0][d] = frame[4][d];
-  //Move column 5-7 into Decoder 0
-  for (int d=5, x=0; x<=2; d++, x++) frameDecoder[0][d] = frame[3][x];
-  //column 8-9 into Decoder 1
-  for (int d=0, x=3; x<=4; d++, x++) frameDecoder[1][d] = frame[3][x];
-  //Column 10-14 into Decoder 1
-  for (int d=2, x=0; x<=4; d++, x++) frameDecoder[1][d] = frame[2][x];
-  //Column 15 into Decoder 1
-  for (int d=7, x=0; x<=0; d++, x++) frameDecoder[1][d] = frame[1][x];  
-  //Column 16-19 into Decoder 2
-  for (int d=0, x=1; x<=4; d++, x++) frameDecoder[2][d] = frame[1][x];
-  //Column 20-23 into Decoder 3
-  for (int d=4, x=0; x<=3; d++, x++) frameDecoder[2][d] = frame[0][x];  
-  //Column 24 into Decoder 4, or stand-alone pin
-  for (int d=0, x=4; x<=4; d++, x++) frameDecoder[3][d] = frame[0][x];  
-  //Fill rest of Decoder 3 with zero
-  for (int d=1; d<=7; d++) frameDecoder[3][d] = 0;
+  ShowDesign(frame, RunTime);
+}
 
-  //Seems like a power issue when all 5 layers are on at the same time.  By only enabling 3, it is stable
-  //SetLayer(0, "On");
-  SetLayer(1, "On");
-  SetLayer(2, "On");
-  SetLayer(3, "On");
-  //SetLayer(4, "On");
+
+
+void DesignCheckerboard(unsigned long RunTime) {
+  boolean frame[5][5][5] = 
+  {
+    {//Layer 0
+      {1, 0, 1, 0, 1},
+      {0, 1, 0, 1, 0},
+      {1, 0, 1, 0, 1},
+      {0, 1, 0, 1, 0},
+      {1, 0, 1, 0, 1}
+    },
+    {//Layer 1
+      {0, 1, 0, 1, 0},
+      {1, 0, 1, 0, 1},
+      {0, 1, 0, 1, 0},
+      {1, 0, 1, 0, 1},
+      {0, 1, 0, 1, 0}
+    },
+    {//Layer 2
+      {1, 0, 1, 0, 1},
+      {0, 1, 0, 1, 0},
+      {1, 0, 1, 0, 1},
+      {0, 1, 0, 1, 0},
+      {1, 0, 1, 0, 1}
+    },
+    {//Layer 3
+      {0, 1, 0, 1, 0},
+      {1, 0, 1, 0, 1},
+      {0, 1, 0, 1, 0},
+      {1, 0, 1, 0, 1},
+      {0, 1, 0, 1, 0}
+    },
+    {//Layer 4
+      {1, 0, 1, 0, 1},
+      {0, 1, 0, 1, 0},
+      {1, 0, 1, 0, 1},
+      {0, 1, 0, 1, 0},
+      {1, 0, 1, 0, 1}
+    }
+  };
+  ShowDesign(frame, RunTime);
+}
+
+void ShowDesign(boolean frame[5][5][5], unsigned long RunTime) {
+  //Accepts a 5x5x5 boolean array and displays the output
+  
+  boolean frameDecoderView [5][4][8];
+ 
+  for (int layer=0; layer<=4; layer++) {
+    //Move data from human logical frame array to an array of data for each decoder
+    //d = DecoderData location, x = Frame array location
+    //Move column 0-4 into Decoder 0 array
+    for (int DecoderOutput=0; DecoderOutput<=4; DecoderOutput++) frameDecoderView[layer][0][DecoderOutput] = frame[layer][4][DecoderOutput];
+    //Move column 5-7 into Decoder 0
+    for (int DecoderOutput=5, x=0; x<=2; DecoderOutput++, x++) frameDecoderView[layer][0][DecoderOutput] = frame[layer][3][x];
+    //column 8-9 into Decoder 1
+    for (int DecoderOutput=0, x=3; x<=4; DecoderOutput++, x++) frameDecoderView[layer][1][DecoderOutput] = frame[layer][3][x];
+    //Column 10-14 into Decoder 1
+    for (int DecoderOutput=2, x=0; x<=4; DecoderOutput++, x++) frameDecoderView[layer][1][DecoderOutput] = frame[layer][2][x];
+    //Column 15 into Decoder 1
+    for (int DecoderOutput=7, x=0; x<=0; DecoderOutput++, x++) frameDecoderView[layer][1][DecoderOutput] = frame[layer][1][x];  
+    //Column 16-19 into Decoder 2
+    for (int DecoderOutput=0, x=1; x<=4; DecoderOutput++, x++) frameDecoderView[layer][2][DecoderOutput] = frame[layer][1][x];
+    //Column 20-23 into Decoder 3
+    for (int DecoderOutput=4, x=0; x<=3; DecoderOutput++, x++) frameDecoderView[layer][2][DecoderOutput] = frame[layer][0][x];  
+    //Column 24 into Decoder 4, or stand-alone pin
+    for (int DecoderOutput=0, x=4; x<=4; DecoderOutput++, x++) frameDecoderView[layer][3][DecoderOutput] = frame[layer][0][x];  
+    //Fill rest of Decoder 3 with zero
+    for (int DecoderOutput=1; DecoderOutput<=7; DecoderOutput++) frameDecoderView[layer][3][DecoderOutput] = 0;
+  }
 
   unsigned long StartTime = millis();
   unsigned long CurrentTime = millis();
   //Run through this function for the specified amount of time
   while (CurrentTime - StartTime <= RunTime) {
-  
-    //Cycle through each element to see if the decoder output needs to be on, and if so, activate it  
-    for (int output=0; output<=7; output++) {
-      for (int decoder=0; decoder<=3; decoder++) {
-        if (frameDecoder[decoder][output] == 1) SetDecoder(decoder, output);
-          else {
-            //digitalWrite(EnableDecoder[decoder], LOW);
-            if (decoder <=2 ) digitalWrite(EnableDecoder[decoder], LOW);
-            if (decoder == 3) digitalWrite(col25, LOW);
-          }
-        //if (frameDecoder[3][output] == 1) digitalWrite(col25, HIGH);
-        //else digitalWrite(col25, LOW);
+    for (int layer=0;layer<=4;layer++) { //Cycle through each layer
+      FullReset();
+      SetLayer(layer, "On");
+      //Cycle through each element to see if the decoder output needs to be on, and if so, activate it  
+      for (int output=0; output<=7; output++) {
+        for (int decoder=0; decoder<=3; decoder++) {
+          if (frameDecoderView[layer][decoder][output] == 1) SetDecoder(decoder, output);
+            else {
+              //digitalWrite(EnableDecoder[decoder], LOW);
+              if (decoder <=2 ) digitalWrite(EnableDecoder[decoder], LOW);
+              if (decoder == 3) digitalWrite(col25, LOW);
+            }
+        }
       }
+    CurrentTime = millis();
+    //Serial.println(millis());
     }
-  CurrentTime = millis();
-  //Serial.println(millis());
   }
-  Serial.println("Finish DesignPerim");
+  //Serial.println("Finished displaying design");
 }
   
 
