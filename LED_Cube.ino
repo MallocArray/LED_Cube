@@ -47,7 +47,7 @@ void setup() {
 void loop() {
   //Main loop for various patterns
   int pattern = random(16);
-  //pattern=15;
+  pattern=14;
   switch(pattern) {
     case 0: 
       LayerWalk(25);
@@ -292,6 +292,7 @@ void ShowDesign(boolean frame[5][5][5], unsigned long RunTime) {
     CurrentTime = millis();
     //Serial.println(millis());
     }
+    FullReset();
   }
   //Serial.println("Finished displaying design");
 }
@@ -726,7 +727,6 @@ void led(int targetLed) {
   //Turn off unneeded decoders and layers
 //  FullReset();
   
-  
   for (int x = 0; x<=2; x++) {
     if (x != targetDecoder) 
     //Except for the targetDecoder, turn all others off
@@ -748,6 +748,9 @@ void led(int targetLed) {
  
 void SetDecoder (int targetDecoder, int targetOutput) {
   //Receives the decoder to set, and what output to enable
+  //Disable targetDecoder so you can't see the input changing
+  digitalWrite(EnableDecoder[targetDecoder], LOW);
+  //Set decoder input
   if (targetDecoder == 3 && targetOutput == 0) digitalWrite(col25, HIGH);
   else {
     //If the A input of decoder (first binary digit) needs to be high (or 1)
