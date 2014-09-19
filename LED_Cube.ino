@@ -47,7 +47,7 @@ void setup() {
 void loop() {
   //Main loop for various patterns
   int pattern = random(16);
-  pattern=14;
+  pattern=16;
   switch(pattern) {
     case 0: 
       LayerWalk(25);
@@ -97,6 +97,9 @@ void loop() {
      case 15:
          for (int x=0; x<2500; x++) RandomLed(1);
          break;
+     case 16:
+       DesignFirework(2000);
+       break;
     case 9000: 
       LayerWalk(25);
       WalkLayerUpDown(25);
@@ -115,46 +118,24 @@ void loop() {
       LightFullCube(5000);
       break;
   }
+}
   
-  //DesignCube(2000);  //Buggy.  Depends on what things were at before starting function
-  //LightFullCube(3000);
+void DesignFirework(unsigned long RunTime) {
+  // shows a column going up, then explosions with random LEDs
+  ColumnUp(12, 150);
+  for (int min=75, max=125; min>=0;min=min-25, max=max-25) {
+    for(int x=0; x<=100; x++) {
+      led(random(min, max));
+      delay(5);
+    }
+  }
   /*
-  SetDecoder(0, 0);
-    SetDecoder(1, 0);
-      SetDecoder(2, 0);
-  SetLayer(0, "On");
-  SetLayer(1, "On");
-  SetLayer(2, "On");
-  SetLayer(3, "On");
-  SetLayer(4, "On");
-    delay(500);
-  digitalWrite(EnableDecoder[0], LOW);
-    delay(500);
-  digitalWrite(EnableDecoder[1], LOW);
-    delay(500);
-  digitalWrite(EnableDecoder[2], LOW);
-  
-  delay(500);
-  //led(50);
-  Serial.println("Pass Complete");
-  delay(500);
-  //led(75);
-  delay(500);
+  for (int x=0; x <= 30; x++) led(random(100, 125));
+  for (int x=0; x <= 30; x++) led(random(75, 100));
+  for (int x=0; x <= 30; x++) led(random(50, 75));
+  for (int x=0; x <= 30; x++) led(random(25, 50));
+  for (int x=0; x <= 30; x++) led(random(0, 25));
   */
-  
-  //DesignPerim(5000);
-  //DesignCube(5000);
-  //FullReset();
-  
-  //for (int x=0; x<=15; x++) FadeLed(random(125));
-  //FadeLed(random(125));
-  //delay(3000);
-
-
-//  LayerByLayerUp(250); //Will need POV to allow all decoder pins to be on
-//  LayerByLayerDown(250); //Will need POV to allow all decoder pins to be on
-//  ColumnByColumnToFull(250);
-//  ColumnByColumnToEmpty(250);
 }
 
 void DesignPerim(unsigned long RunTime) {
