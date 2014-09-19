@@ -23,6 +23,8 @@ const int columnsTotal = 25; //Total number of columns in a layer 5x5
 
 //Function Prototypes to allow for default argument values
 //Must be above the Setup line? http://forum.arduino.cc/index.php/topic,40799.0.html
+void led(int targetLed, int brightness=255); 
+void SetLayer(int targetLayer, String desiredStatus="on", int brightness=255);
 void FadeLed(int targetLed, int runTime=1500, int minBrightness=0, int maxBrightness=255);
 void FadeLayer(int targetLayer, int runTime=1500, int minBrightness=0, int maxBrightness=255);
 
@@ -121,21 +123,14 @@ void loop() {
 }
   
 void DesignFirework(unsigned long RunTime) {
-  // shows a column going up, then explosions with random LEDs
+  // shows a column going up, then explosions with random LEDs on 2 layers and fading out
   ColumnUp(12, 150);
-  for (int min=75, max=125; min>=0;min=min-25, max=max-25) {
+  for (int minled=75, maxLed=125, brightness=193; minled>=0; minled=minled-25, maxLed=maxLed-25, brightness=brightness-64) {
     for(int x=0; x<=100; x++) {
-      led(random(min, max));
+      led(random(minled, maxLed), brightness);
       delay(5);
     }
   }
-  /*
-  for (int x=0; x <= 30; x++) led(random(100, 125));
-  for (int x=0; x <= 30; x++) led(random(75, 100));
-  for (int x=0; x <= 30; x++) led(random(50, 75));
-  for (int x=0; x <= 30; x++) led(random(25, 50));
-  for (int x=0; x <= 30; x++) led(random(0, 25));
-  */
 }
 
 void DesignPerim(unsigned long RunTime) {
@@ -691,7 +686,7 @@ void Status() {
   //Need to add entries for column 25 as well as layers
 }
  
-void led(int targetLed) {
+void led(int targetLed, int brightness) {
   //Calculate which layer needs to be used
   //Divide the targetLed by the total number of columns in a layer
   //Since it will round down to the nearest whole number, this gives the layer
@@ -724,7 +719,7 @@ void led(int targetLed) {
   if (targetColumn == 24) digitalWrite(col25, HIGH);
   else digitalWrite(col25, LOW);
   //Enable power to the target layer
-  SetLayer(targetLayer, "On");
+  SetLayer(targetLayer, "On", brightness);
 }
  
 void SetDecoder (int targetDecoder, int targetOutput) {
@@ -748,9 +743,12 @@ void SetDecoder (int targetDecoder, int targetOutput) {
   }
 }
 
-void SetLayer(int targetLayer, String desiredStatus) {
+void SetLayer(int targetLayer, String desiredStatus, int brightness) {
   //Accepts a layer number and On or Off to make apporopriate changes
-  if (desiredStatus == "On" || desiredStatus == "on" || desiredStatus == "1")   digitalWrite(Layer[targetLayer], HIGH);
+  if (desiredStatus == "On" || desiredStatus == "on" || desiredStatus == "1") {
+    if (brightness==255) digitalWrite(Layer[targetLayer], HIGH);
+    else analogWrite(Layer[targetLayer], brightness); 
+  }
   if (desiredStatus == "Off" || desiredStatus == "off" || desiredStatus == "0")   digitalWrite(Layer[targetLayer], LOW);
 }
 
