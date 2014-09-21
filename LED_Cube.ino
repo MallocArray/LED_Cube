@@ -48,8 +48,9 @@ void setup() {
 
 void loop() {
   //Main loop for various patterns
-  int pattern = random(16);
-  pattern=17;
+  int pattern = random(19);
+  //Remark out the line below to run random patterns, or set the value to the pattern you want to display
+  pattern=18;
   switch(pattern) {
     case 0: 
       LayerWalk(25);
@@ -108,6 +109,12 @@ void loop() {
        DesignExplode(250);
        delay(500);
        break;
+     case 18:
+       DesignSidewaysFill(3000);
+       break;
+     case 19:
+       DesignDiagonalFill(3000);
+       break;
     case 9000: 
       LayerWalk(25);
       WalkLayerUpDown(25);
@@ -131,6 +138,7 @@ void loop() {
 void DesignFirework(unsigned long RunTime) {
   // shows a column going up, then explosions with random LEDs on 2 layers and fading out
   ColumnUp(12, 150);
+  //Randomly flash LED on two layers at a time, fading out each time
   for (int minled=75, maxLed=125, brightness=193; minled>=0; minled=minled-25, maxLed=maxLed-25, brightness=brightness-64) {
     for(int x=0; x<=100; x++) {
       led(random(minled, maxLed), brightness);
@@ -139,7 +147,721 @@ void DesignFirework(unsigned long RunTime) {
   }
 }
 
+
+void DesignDiagonalFill(unsigned long RunTime) {
+  //3 Frame animation filling cube diagaonally
+  int framecount=9;
+  boolean frame1[5][5][5] = 
+  {
+    {//Layer 0
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0}
+    },
+    {//Layer 1
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0}
+    },
+    {//Layer 2
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0}
+    },
+    {//Layer 3
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0}
+    },
+    {//Layer 4
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0}
+    }
+  };
+  ShowDesign(frame1, RunTime/framecount);
+  boolean frame2[5][5][5] = 
+  {
+    {//Layer 0
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0}
+    },
+    {//Layer 1
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0}
+    },
+    {//Layer 2
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0}
+    },
+    {//Layer 3
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0}
+    },
+    {//Layer 4
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0}
+    }
+  };
+  ShowDesign(frame2, RunTime/framecount);
+  boolean frame3[5][5][5] = 
+  {
+    {//Layer 0
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0}
+    },
+    {//Layer 1
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0}
+    },
+    {//Layer 2
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0}
+    },
+    {//Layer 3
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0}
+    },
+    {//Layer 4
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0}
+    }
+  };
+  ShowDesign(frame3, RunTime/framecount);
+  boolean frame4[5][5][5] = 
+  {
+    {//Layer 0
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0}
+    },
+    {//Layer 1
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0}
+    },
+    {//Layer 2
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0}
+    },
+    {//Layer 3
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0}
+    },
+    {//Layer 4
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0}
+    }
+  };
+  ShowDesign(frame4, RunTime/framecount);
+  boolean frame5[5][5][5] = 
+  {
+    {//Layer 0
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 1
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 2
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 3
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 4
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1}
+    }
+  };
+  ShowDesign(frame5, RunTime/framecount);
+  boolean frame6[5][5][5] = 
+  {
+    {//Layer 0
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 1
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 2
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 3
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 4
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    }
+  };
+  ShowDesign(frame6, RunTime/framecount);
+  boolean frame7[5][5][5] = 
+  {
+    {//Layer 0
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 1
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 2
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 3
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 4
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    }
+  };
+  ShowDesign(frame7, RunTime/framecount);
+  boolean frame8[5][5][5] = 
+  {
+    {//Layer 0
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 1
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 2
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 3
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 4
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    }
+  };
+  ShowDesign(frame8, RunTime/framecount);
+  boolean frame9[5][5][5] = 
+  {
+    {//Layer 0
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 1
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 2
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 3
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 4
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    }
+  };
+  ShowDesign(frame9, RunTime/framecount);
+}
+
+void DesignSidewaysFill(unsigned long RunTime) {
+  //3 Frame animation filling cube sideways
+  int framecount=9;
+  boolean frame1[5][5][5] = 
+  {
+    {//Layer 0
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0}
+    },
+    {//Layer 1
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0}
+    },
+    {//Layer 2
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0}
+    },
+    {//Layer 3
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0}
+    },
+    {//Layer 4
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0}
+    }
+  };
+  ShowDesign(frame1, RunTime/framecount);
+  boolean frame2[5][5][5] = 
+  {
+    {//Layer 0
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0}
+    },
+    {//Layer 1
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0}
+    },
+    {//Layer 2
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0}
+    },
+    {//Layer 3
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0}
+    },
+    {//Layer 4
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0}
+    }
+  };
+  ShowDesign(frame2, RunTime/framecount);
+  boolean frame3[5][5][5] = 
+  {
+    {//Layer 0
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0}
+    },
+    {//Layer 1
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0}
+    },
+    {//Layer 2
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0}
+    },
+    {//Layer 3
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0}
+    },
+    {//Layer 4
+      {0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0}
+    }
+  };
+  ShowDesign(frame3, RunTime/framecount);
+  boolean frame4[5][5][5] = 
+  {
+    {//Layer 0
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0}
+    },
+    {//Layer 1
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0}
+    },
+    {//Layer 2
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0}
+    },
+    {//Layer 3
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0}
+    },
+    {//Layer 4
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0}
+    }
+  };
+  ShowDesign(frame4, RunTime/framecount);
+  boolean frame5[5][5][5] = 
+  {
+    {//Layer 0
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 1
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 2
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 3
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 4
+      {1, 0, 0, 0, 0},
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1}
+    }
+  };
+  ShowDesign(frame5, RunTime/framecount);
+  boolean frame6[5][5][5] = 
+  {
+    {//Layer 0
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 1
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 2
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 3
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 4
+      {1, 1, 0, 0, 0},
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    }
+  };
+  ShowDesign(frame6, RunTime/framecount);
+  boolean frame7[5][5][5] = 
+  {
+    {//Layer 0
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 1
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 2
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 3
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 4
+      {1, 1, 1, 0, 0},
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    }
+  };
+  ShowDesign(frame7, RunTime/framecount);
+  boolean frame8[5][5][5] = 
+  {
+    {//Layer 0
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 1
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 2
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 3
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 4
+      {1, 1, 1, 1, 0},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    }
+  };
+  ShowDesign(frame8, RunTime/framecount);
+  boolean frame9[5][5][5] = 
+  {
+    {//Layer 0
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 1
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 2
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 3
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    },
+    {//Layer 4
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1}
+    }
+  };
+  ShowDesign(frame9, RunTime/framecount);
+}
+
 void DesignExplode(unsigned long RunTime) {
+  //3 Frame animation starting with center LED and exploding out
   int framecount=3;
   boolean frame[5][5][5] = 
   {
@@ -262,6 +984,7 @@ void DesignExplode(unsigned long RunTime) {
 
 
 void DesignPerim(unsigned long RunTime) {
+  //Design that lights up only the permimeter edges
   boolean frame[5][5][5] = 
   {
     {//Layer 0
@@ -306,6 +1029,7 @@ void DesignPerim(unsigned long RunTime) {
 
 
 void DesignCheckerboard(unsigned long RunTime) {
+  //Every other LED in all directions
   boolean frame[5][5][5] = 
   {
     {//Layer 0
@@ -348,8 +1072,8 @@ void DesignCheckerboard(unsigned long RunTime) {
 }
 
 void ShowDesign(boolean frame[5][5][5], unsigned long RunTime) {
-  //Accepts a 5x5x5 boolean array and displays the output
-  
+  //Accepts a 5x5x5 boolean array and displays the output simultaneous
+  //Output is significantly dimmer than single as we are flashing off and on and limited power per layer
   boolean frameDecoderView [5][4][8];
  
   for (int layer=0; layer<=4; layer++) {
@@ -380,7 +1104,7 @@ void ShowDesign(boolean frame[5][5][5], unsigned long RunTime) {
   //Run through this function for the specified amount of time
   while (CurrentTime - StartTime <= RunTime) {
     for (int layer=0;layer<=4;layer++) { //Cycle through each layer
-      FullReset();
+      FullReset(); // Turn off all output to prepare for this layer
       SetLayer(layer, "On");
       //Cycle through each element to see if the decoder output needs to be on, and if so, activate it  
       for (int output=0; output<=7; output++) {
@@ -394,11 +1118,9 @@ void ShowDesign(boolean frame[5][5][5], unsigned long RunTime) {
         }
       }
     CurrentTime = millis();
-    //Serial.println(millis());
     }
     FullReset();
   }
-  //Serial.println("Finished displaying design");
 }
   
 
@@ -456,69 +1178,6 @@ void FadeLayer(int targetLayer, int runTime, int minBrightness, int maxBrightnes
     //Wait to see the dimming effect
     delay(delayTime);                            
   } 
-}
-
-
-void DesignCube(int RunTime) {
-  //Supposed to light up a design of only the peremiter of the cube.  Very buggy and doesn't like the FullReset function at all
-  long StartTime = millis();
-  unsigned long CurrentTime = millis();
-  int DelayTime =1;
-  int Frames = 5;
-//  led(0);
-  FullReset();
-  while (CurrentTime - StartTime <= RunTime) {
-    //Frame 1
-    FullReset();
-    for (int x=0; x<=2; x++) digitalWrite(EnableDecoder[x], LOW);  
-    //digitalWrite(EnableDecoder[0], LOW);
-    //digitalWrite(EnableDecoder[1], LOW);
-    //digitalWrite(EnableDecoder[2], LOW);
-    //for (int x=0; x<=4; x++) SetLayer(x, "On");
-    SetLayer(0,"On");
-    //SetLayer(1,"On");
-    //SetLayer(2,"On");
-    SetLayer(3,"On");
-    SetLayer(4,"On");
-    digitalWrite(EnableDecoder[1], LOW);    
-    SetDecoder(0,0);
-    delay(DelayTime);
-    SetDecoder(0,4);
-    SetDecoder(2,4);
-    digitalWrite(col25, HIGH);
-    delay(DelayTime);  
-    //Frame2;
-    SetLayer(1,"Off");
-    SetLayer(2,"Off");
-    SetLayer(3,"Off");
-    SetDecoder(0,1);
-    SetDecoder(1,1);
-    SetDecoder(2,3);
-    digitalWrite(col25, LOW);
-    delay(DelayTime);
-    //Frame 3
-    SetDecoder(0,2);
-    SetDecoder(1,2);
-    SetDecoder(2,4);
-    digitalWrite(col25, HIGH);
-    delay(DelayTime);
-    //Frame 4
-    SetDecoder(0,3);
-    SetDecoder(1,6);
-    SetDecoder(2,5);
-    digitalWrite(col25, LOW);
-    delay(DelayTime);
-    //Frame 5
-    SetDecoder(0,5);
-    SetDecoder(1,7);
-    SetDecoder(2,6);
-    delay(DelayTime);
-    //Frame 6
-    SetDecoder(2,7);
-    delay(DelayTime);
-    CurrentTime = millis();
-  }
-  FullReset();
 }
 
 void CrawlFullCube(int RunTime) {
@@ -602,21 +1261,6 @@ void LightFullCube (int RunTime) {
   for (int x=0; x<=4; x++) SetLayer(x, "On"); //Turn all layers on
   //Run through this function for the specified amount of time
   CyclePins(RunTime);
-  
-  /*
-  while (CurrentTime - StartTime <= RunTime) {
-    //Cycle through each Decoder output, at a specified delay
-    for (int x=0; x<=7; x++) {
-      digitalWrite(col25, HIGH); //To keep the last column in sync, it cycles off an on like the others
-      SetDecoder(0, x);
-      SetDecoder(1, x);
-      SetDecoder(2, x);
-      digitalWrite(col25, LOW);
-      delayMicroseconds(250); //When using 1 millisecond, the 25th column looks dimmer
-    }
-    CurrentTime = millis();
-  }
-  */
 }
 
 
@@ -626,6 +1270,7 @@ void RandomLed (int delayTime) {
 }
 
 void ColumnUpDown (int targetLed, int delayTime) {
+  //Starts at the bottom layer and lights up the cube, and then starts going back down
   led(targetLed);
   delay(delayTime);
   for (int x=1; x<=4; x++) {
@@ -886,27 +1531,12 @@ void FullReset() {
   //Turn off all columns and layers
   //Used when lighting individual LED
   //Could add logic to check if an existing LED on column or layer is lit and leave it
-  for (int x = 0; x<=2; x++) digitalWrite(EnableDecoder[x], LOW);
-  for (int x = 0; x<=5; x++) digitalWrite(Layer[x], LOW);
+  for (int x = 0; x<=2; x++) digitalWrite(EnableDecoder[x], LOW); //Turn off each decoder
+  for (int x = 0; x<=5; x++) digitalWrite(Layer[x], LOW); //Turn off each layer
   digitalWrite(col25, LOW);
 }
 
-void AllColumnsHigh() {
-  //Sets pins to HIGH for all columns
-  //Broken as this only enables Pin 8 of each decoder
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], HIGH);
-  digitalWrite(DecoderPinA[1], HIGH);
-  digitalWrite(DecoderPinB[1], HIGH);
-  digitalWrite(DecoderPinC[1], HIGH);
-  digitalWrite(DecoderPinA[2], HIGH);
-  digitalWrite(DecoderPinB[2], HIGH);
-  digitalWrite(DecoderPinC[2], HIGH);
-  digitalWrite(col25, HIGH);
-}
-
-void AllLayersHigh() {
+void AllLayersOn() {
   //Sets pins to high for all layers
   digitalWrite(Layer[0], HIGH);
   digitalWrite(Layer[1], HIGH);
@@ -915,8 +1545,6 @@ void AllLayersHigh() {
   digitalWrite(Layer[4], HIGH);
 }
  
-
-
 void LayerWalk(int delayTime){
   //Walks all LED from lowest to highest
   for (int i=0; i < layersTotal * columnsTotal; i++) {
@@ -925,113 +1553,3 @@ void LayerWalk(int delayTime){
   }
 }
 
-    
-void LayerByLayerUp(int DelayTime) {
-  //Starts with all layers off and all columns HIGH
-  //Adds one column at a time until all are on
-  //Can consolidate with a for loop
-  FullReset();
-  AllColumnsHigh();
-  digitalWrite(Layer[0], HIGH);
-  delay(DelayTime);
-  digitalWrite(Layer[1], HIGH);
-  delay(DelayTime);
-  digitalWrite(Layer[2], HIGH);
-  delay(DelayTime);
-  digitalWrite(Layer[3], HIGH);
-  delay(DelayTime);
-  digitalWrite(Layer[4], HIGH);
-}
-
-void LayerByLayerDown(int DelayTime) {
-  //Can cosolidate with For loop
-  AllColumnsHigh();
-  AllLayersHigh();
-  digitalWrite(Layer[4], LOW);
-  delay(DelayTime);
-  digitalWrite(Layer[3], LOW);
-  delay(DelayTime);
-  digitalWrite(Layer[2], LOW);
-  delay(DelayTime);
-  digitalWrite(Layer[1], LOW);
-  delay(DelayTime);
-  digitalWrite(Layer[0], LOW);
-}
-
-void ColumnByColumnToFull(int DelayTime) {
-  //Starts with all columns and layers Low, and adds one column at a time
-  //Continues until all are lit
-  FullReset();
-  AllLayersHigh();
-  digitalWrite(DecoderPinA[0], LOW);
-  digitalWrite(DecoderPinB[0], LOW);
-  digitalWrite(DecoderPinC[0], LOW);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], LOW);
-  digitalWrite(DecoderPinC[0], LOW);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], LOW);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], LOW);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], LOW);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], LOW);
-  digitalWrite(DecoderPinB[0], LOW);
-  digitalWrite(DecoderPinC[0], HIGH);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], LOW);
-  digitalWrite(DecoderPinC[0], HIGH);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], LOW);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], HIGH);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], HIGH);
-  delay(DelayTime);
-}
-
-void ColumnByColumnToEmpty(int DelayTime) {
-  //Starts with all columns and layers, and removes one column at a time
-  //Continues until empty
-  AllColumnsHigh();
-  AllLayersHigh();
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], HIGH);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], LOW);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], HIGH);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], LOW);
-  digitalWrite(DecoderPinC[0], HIGH);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], LOW);
-  digitalWrite(DecoderPinB[0], LOW);
-  digitalWrite(DecoderPinC[0], HIGH);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], LOW);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], LOW);
-  digitalWrite(DecoderPinB[0], HIGH);
-  digitalWrite(DecoderPinC[0], LOW);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], HIGH);
-  digitalWrite(DecoderPinB[0], LOW);
-  digitalWrite(DecoderPinC[0], LOW);
-  delay(DelayTime);
-  digitalWrite(DecoderPinA[0], LOW);
-  digitalWrite(DecoderPinB[0], LOW);
-  digitalWrite(DecoderPinC[0], LOW);
-  delay(DelayTime);
-}
