@@ -50,7 +50,7 @@ void loop() {
   //Main loop for various patterns
   int pattern = random(19);
   //Remark out the line below to run random patterns, or set the value to the pattern you want to display
-  pattern=18;
+  pattern=19;
   switch(pattern) {
     case 0: 
       LayerWalk(25);
@@ -147,10 +147,15 @@ void DesignFirework(unsigned long RunTime) {
   }
 }
 
+void DesignDiagonalFill(int RunTime) {
+  //Animation filling cube diagaonally
+  ShowDiagonalFillPart1(RunTime/2);
+  ShowDiagonalFillPart2(RunTime/2);
+}
 
-void DesignDiagonalFill(unsigned long RunTime) {
-  //3 Frame animation filling cube diagaonally
-  int framecount=9;
+ 
+void ShowDiagonalFillPart1(int RunTime) {
+  int framecount=5;
   boolean frame1[5][5][5] = 
   {
     {//Layer 0
@@ -346,7 +351,12 @@ void DesignDiagonalFill(unsigned long RunTime) {
     }
   };
   ShowDesign(frame5, RunTime/framecount);
-  boolean frame6[5][5][5] = 
+
+}
+
+void ShowDiagonalFillPart2(int RunTime) {
+  int framecount=4;
+    boolean frame6[5][5][5] = 
   {
     {//Layer 0
       {1, 1, 0, 0, 0},
@@ -504,7 +514,7 @@ void DesignDiagonalFill(unsigned long RunTime) {
   ShowDesign(frame9, RunTime/framecount);
 }
 
-void DesignSidewaysFill(unsigned long RunTime) {
+void DesignSidewaysFill(int RunTime) {
   //3 Frame animation filling cube sideways
   int framecount=9;
   boolean frame1[5][5][5] = 
@@ -528,7 +538,7 @@ void DesignSidewaysFill(unsigned long RunTime) {
       {0, 0, 0, 0, 0},
       {0, 0, 0, 0, 0},
       {0, 0, 0, 0, 0},
-      {0, 0, 0, 0, 0}
+      {1, 0, 0, 0, 0}
     },
     {//Layer 3
       {0, 0, 0, 0, 0},
