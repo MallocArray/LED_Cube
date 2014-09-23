@@ -48,9 +48,9 @@ void setup() {
 
 void loop() {
   //Main loop for various patterns
-  int pattern = random(19);
+  int pattern = random(18);
   //Remark out the line below to run random patterns, or set the value to the pattern you want to display
-  pattern=19;
+  //pattern=19;
   switch(pattern) {
     case 0: 
       LayerWalk(25);
@@ -68,13 +68,13 @@ void loop() {
        for (int x=0; x <= 30; x++) RandomLed(150); //30 random LEDs
        break;
      case 5:
-       for (int x=0; x <= 2; x++) ColumnUpDown(random(25), 150); //Random up and down the column
+       for (int x=0; x <= 0; x++) ColumnUpDown(random(25), 150); //Random up and down the column
        break;
      case 6:
-       for (int x=0; x <= 2; x++) ColumnUp(random(25), 150); //Random up the column
+       for (int x=0; x <= 0; x++) ColumnUp(random(25), 150); //Random up the column
        break;
      case 7:
-       for (int x=0; x <= 2; x++) ColumnDown(random(100, 125), 150); //Random down the column
+       for (int x=0; x <= 0; x++) ColumnDown(random(100, 125), 150); //Random down the column
        break;
      case 8:
        CrawlFullCube(1000);
@@ -89,7 +89,7 @@ void loop() {
        for (int x=0; x<20; x++) LayerWalk(1);
        break;
      case 12:
-       LightFullCube(5000);
+       LightFullCube(3000);
        break;
      case 13:
        DesignCheckerboard(5000);
@@ -109,12 +109,14 @@ void loop() {
        DesignExplode(250);
        delay(500);
        break;
+/*
      case 18:
-       DesignSidewaysFill(3000);
+       DesignSidewaysFill(1000);
        break;
      case 19:
-       DesignDiagonalFill(3000);
+       DesignDiagonalFill(10000);
        break;
+       */
     case 9000: 
       LayerWalk(25);
       WalkLayerUpDown(25);
@@ -149,13 +151,14 @@ void DesignFirework(unsigned long RunTime) {
 
 void DesignDiagonalFill(int RunTime) {
   //Animation filling cube diagaonally
-  ShowDiagonalFillPart1(RunTime/2);
-  ShowDiagonalFillPart2(RunTime/2);
+  ShowDiagonalFillPart1(RunTime/9*4);
+  ShowDiagonalFillPart2(RunTime/9*4);
+  ShowDiagonalFillPart3(RunTime/9*1);
 }
 
  
 void ShowDiagonalFillPart1(int RunTime) {
-  int framecount=5;
+  int framecount=4;
   boolean frame1[5][5][5] = 
   {
     {//Layer 0
@@ -312,6 +315,10 @@ void ShowDiagonalFillPart1(int RunTime) {
     }
   };
   ShowDesign(frame4, RunTime/framecount);
+}
+
+void ShowDiagonalFillPart2(int RunTime) {
+  int framecount=4;
   boolean frame5[5][5][5] = 
   {
     {//Layer 0
@@ -351,11 +358,6 @@ void ShowDiagonalFillPart1(int RunTime) {
     }
   };
   ShowDesign(frame5, RunTime/framecount);
-
-}
-
-void ShowDiagonalFillPart2(int RunTime) {
-  int framecount=4;
     boolean frame6[5][5][5] = 
   {
     {//Layer 0
@@ -473,6 +475,9 @@ void ShowDiagonalFillPart2(int RunTime) {
     }
   };
   ShowDesign(frame8, RunTime/framecount);
+}
+void ShowDiagonalFillPart3(int RunTime) {
+  int framecount=1;
   boolean frame9[5][5][5] = 
   {
     {//Layer 0
@@ -515,8 +520,14 @@ void ShowDiagonalFillPart2(int RunTime) {
 }
 
 void DesignSidewaysFill(int RunTime) {
-  //3 Frame animation filling cube sideways
-  int framecount=9;
+  DesignSidewaysFillPart1(RunTime/9*4);
+  DesignSidewaysFillPart2(RunTime/9*4);
+  DesignSidewaysFillPart3(RunTime/9*1);
+}
+
+void DesignSidewaysFillPart1(int RunTime) {
+  //Animation filling cube sideways
+  int framecount=4;
   boolean frame1[5][5][5] = 
   {
     {//Layer 0
@@ -673,6 +684,11 @@ void DesignSidewaysFill(int RunTime) {
     }
   };
   ShowDesign(frame4, RunTime/framecount);
+}
+
+void DesignSidewaysFillPart2(int RunTime) {
+  //Animation filling cube sideways
+  int framecount=4;
   boolean frame5[5][5][5] = 
   {
     {//Layer 0
@@ -829,6 +845,10 @@ void DesignSidewaysFill(int RunTime) {
     }
   };
   ShowDesign(frame8, RunTime/framecount);
+}
+void DesignSidewaysFillPart3(int RunTime) {
+  //Animation filling cube sideways
+  int framecount=1;
   boolean frame9[5][5][5] = 
   {
     {//Layer 0
