@@ -1059,7 +1059,7 @@ void DesignPerim(unsigned long RunTime) {
 }
 
 void DesignCheckerboardV2(unsigned long RunTime) {
-  long unsigned frame[5][5] = {
+  int frame[5][5] = {
     {//Layer 0
       B10101, 
       B01010,
@@ -1196,7 +1196,7 @@ void ShowDesign(boolean frame[5][5][5], unsigned long RunTime) {
 
 
 
-void ShowDesignV2(unsigned long frame[5][5], unsigned long RunTime) {
+void ShowDesignV2(int frame[5][5], unsigned long RunTime) {
   //Accepts a 5 array and displays the output simultaneous
   //Output is significantly dimmer than single as we are flashing off and on and limited power per layer
   
@@ -1219,8 +1219,8 @@ void ShowDesignV2(unsigned long frame[5][5], unsigned long RunTime) {
 unsigned long ledLine[5];
 //Take all layer and row information and put into a long array for each layer to walk through
 for (int layer=0; layer<=4; layer++) {
-  for (int row=0; row<=4; row++) {
-    if (row == 0) ledLine[layer]=frame[layer][0]; //For first entry, set the value to the first row
+  for (int row=4; row>=0; row--) {
+    if (row == 4) ledLine[layer]=frame[layer][4]; //For first entry, set the value to the lowest row, since the decoders are connected starting at the bottom if viewed from above.
     else ledLine[layer] = (ledLine[layer] << 5) | frame[layer][row]; //Shift the existing values to the left by 5 digits, then OR the next row into the empty area
   }
 }
