@@ -38,7 +38,7 @@ void setup() {
     digitalWrite(ledPins[thisPin], LOW);  
   }
   delay(1);
-  //Serial.begin(9600);
+  Serial.begin(9600);
   Serial.println("Setup Done");
 }
 
@@ -50,7 +50,8 @@ void loop() {
   //Main loop for various patterns
   int pattern = random(18);
   //Remark out the line below to run random patterns, or set the value to the pattern you want to display
-  pattern=19;
+  //pattern=19;
+  Serial.println(freeRam()); 
   switch(pattern) {
     case 0: 
       LayerWalk(25);
@@ -98,8 +99,8 @@ void loop() {
        DesignPerim(5000);
        break;
      case 15:
-         for (int x=0; x<2500; x++) RandomLed(1);
-         break;
+       for (int x=0; x<2500; x++) RandomLed(1);
+       break;
      case 16:
        DesignFirework(2000);
        break;
@@ -109,12 +110,14 @@ void loop() {
        DesignExplode(250);
        delay(500);
        break;
+     /*
      case 18:
        DesignSidewaysFill(1000);
        break;
      case 19:
        DesignDiagonalFill(1000);
        break;
+    */
      case 20:
        DesignCheckerboardV2(3000);
        break;
@@ -1223,6 +1226,7 @@ for (int layer=0; layer<=4; layer++) {
     if (row == 4) ledLine[layer]=frame[layer][4]; //For first entry, set the value to the lowest row, since the decoders are connected starting at the bottom if viewed from above.
     else ledLine[layer] = (ledLine[layer] << 5) | frame[layer][row]; //Shift the existing values to the left by 5 digits, then OR the next row into the empty area
   }
+  ledLine[layer] = (ledLine[layer] << 7); //Shift further over by 7 digits to fill out the space for the 4th virtual decoder
 }
 
   unsigned long StartTime = millis();
@@ -1235,8 +1239,8 @@ for (int layer=0; layer<=4; layer++) {
       //Cycle through each element to see if the decoder output needs to be on, and if so, activate it  
       for (int output=0; output<=7; output++) {
         for (int decoder=0; decoder<=3; decoder++) {
-            if (ledLine[layer] & (1<<24-(decoder*8)-output)) { //Need to shift over 24 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
-          //if (ledLine[layer] & (16777216>>(decoder*8)+output)) //Possibly simpler to understand, as the starting point is at LED 0 and then shifting to the right
+            if (ledLine[layer] & (1<<31-(decoder*8)-output)) { //Need to shift over 31 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
+          //if (ledLine[layer] & (2147483648 >>(decoder*8)+output)) //Possibly simpler to understand, as the starting point is at LED 0 and then shifting to the right
                   SetDecoder(decoder, output); 
                 } else {
                     //digitalWrite(EnableDecoder[decoder], LOW);
@@ -1679,5 +1683,12 @@ void LayerWalk(int delayTime){
     led(i);
     delay(delayTime);
   }
+}
+
+int freeRam () {
+  //http://playground.arduino.cc/Code/AvailableMemory
+  extern int __heap_start, *__brkval; 
+  int v; 
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
 }
 
