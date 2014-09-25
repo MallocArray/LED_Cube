@@ -50,7 +50,7 @@ void loop() {
   //Main loop for various patterns
   int pattern = random(18);
   //Remark out the line below to run random patterns, or set the value to the pattern you want to display
-  //pattern=19;
+  pattern=19;
   switch(pattern) {
     case 0: 
       LayerWalk(25);
@@ -109,14 +109,16 @@ void loop() {
        DesignExplode(250);
        delay(500);
        break;
-/*
      case 18:
        DesignSidewaysFill(1000);
        break;
      case 19:
-       DesignDiagonalFill(10000);
+       DesignDiagonalFill(1000);
        break;
-       */
+     case 20:
+       DesignCheckerboardV2(3000);
+       break;
+      
     case 9000: 
       LayerWalk(25);
       WalkLayerUpDown(25);
@@ -1056,7 +1058,46 @@ void DesignPerim(unsigned long RunTime) {
   ShowDesign(frame, RunTime);
 }
 
-
+void DesignCheckerboardV2(unsigned long RunTime) {
+  long unsigned frame[5][5] = {
+    {//Layer 0
+      B10101, 
+      B01010,
+      B10101, 
+      B01010,
+      B10101
+    },
+    {//Layer 1
+      B01010,
+      B10101, 
+      B01010,
+      B10101,
+      B10101 
+    },
+    {//Layer 2
+      B10101, 
+      B01010,
+      B10101, 
+      B01010,
+      B10101
+    },
+    {//Layer 3
+      B01010,
+      B10101, 
+      B01010,
+      B10101,
+      B10101 
+    },
+    {//Layer 4
+      B10101, 
+      B01010,
+      B10101, 
+      B01010,
+      B10101
+    }
+  };
+  ShowDesignV2(frame, RunTime);
+}
 
 void DesignCheckerboard(unsigned long RunTime) {
   //Every other LED in all directions
@@ -1144,6 +1185,63 @@ void ShowDesign(boolean frame[5][5][5], unsigned long RunTime) {
               //digitalWrite(EnableDecoder[decoder], LOW);
               if (decoder <=2 ) digitalWrite(EnableDecoder[decoder], LOW);
               if (decoder == 3) digitalWrite(col25, LOW);
+            }
+        }
+      }
+    CurrentTime = millis();
+    }
+    FullReset();
+  }
+}
+
+
+
+void ShowDesignV2(unsigned long frame[5][5], unsigned long RunTime) {
+  //Accepts a 5 array and displays the output simultaneous
+  //Output is significantly dimmer than single as we are flashing off and on and limited power per layer
+  
+  /*
+  boolean frameDecoderView [5][4][8];
+     for (byte layer=0; layer<=4; layer++ {
+        for (byte row=0; row<5; ++row) {
+            //byte data = pgm_read_byte (&BitMap[x]);   // fetch data from program memory
+            for (byte y=0; y<7; ++y) {
+                if (frame[layer][row] & (1<<y)) {
+                    // turn on the LED at location (x,y)
+                } else {
+                    // turn off the LED at location (x,y)
+                }
+            }
+        }
+     }
+    */
+    
+unsigned long ledLine[5];
+//Take all layer and row information and put into a long array for each layer to walk through
+for (int layer=0; layer<=4; layer++) {
+  for (int row=0; row<=4; row++) {
+    if (row == 0) ledLine[layer]=frame[layer][0]; //For first entry, set the value to the first row
+    else ledLine[layer] = (ledLine[layer] << 5) | frame[layer][row]; //Shift the existing values to the left by 5 digits, then OR the next row into the empty area
+  }
+}
+
+  unsigned long StartTime = millis();
+  unsigned long CurrentTime = millis();
+  //Run through this function for the specified amount of time
+  while (CurrentTime - StartTime <= RunTime) {
+    for (int layer=0;layer<=4;layer++) { //Cycle through each layer
+      FullReset(); // Turn off all output to prepare for this layer
+      SetLayer(layer, "On");
+      //Cycle through each element to see if the decoder output needs to be on, and if so, activate it  
+      for (int output=0; output<=7; output++) {
+        for (int decoder=0; decoder<=3; decoder++) {
+            if (ledLine[layer] & (1<<24-(decoder*8)-output)) { //Need to shift over 24 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
+          //if (ledLine[layer] & (16777216>>(decoder*8)+output)) //Possibly simpler to understand, as the starting point is at LED 0 and then shifting to the right
+                  SetDecoder(decoder, output); 
+                } else {
+                    //digitalWrite(EnableDecoder[decoder], LOW);
+                    if (decoder <=2 ) digitalWrite(EnableDecoder[decoder], LOW);
+                    if (decoder == 3) digitalWrite(col25, LOW);
             }
         }
       }
