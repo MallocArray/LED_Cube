@@ -38,7 +38,7 @@ void setup() {
     digitalWrite(ledPins[thisPin], LOW);  
   }
   delay(1);
-  Serial.begin(9600);
+  //Serial.begin(9600);
   Serial.println("Setup Done");
 }
 
@@ -50,7 +50,7 @@ void loop() {
   //Main loop for various patterns
   int pattern = random(18);
   //Remark out the line below to run random patterns, or set the value to the pattern you want to display
-  //pattern=19;
+  pattern=22;
   Serial.println(freeRam()); 
   switch(pattern) {
     case 0: 
@@ -121,7 +121,13 @@ void loop() {
      case 20:
        DesignCheckerboardV2(3000);
        break;
-      
+     case 21:
+       DesignTest(1000);
+       //delay(100000);
+       break;
+     case 22:
+       DesignDiagonalFillV2(1000);
+       break;
     case 9000: 
       LayerWalk(25);
       WalkLayerUpDown(25);
@@ -141,6 +147,327 @@ void loop() {
       break;
   }
 }
+
+void DesignDiagonalFillV2(unsigned long RunTime) {
+  byte frames = 13;
+  int frame[5][5] = {
+    {//Layer 0
+      B00000, 
+      B00000,
+      B00000, 
+      B00000,
+      B10000
+    },
+    {//Layer 1
+      B00000,
+      B00000, 
+      B00000,
+      B00000,
+      B00000
+    },
+    {//Layer 2
+      B00000, 
+      B00000,
+      B00000, 
+      B00000,
+      B00000
+    },
+    {//Layer 3
+      B00000,
+      B00000, 
+      B00000,
+      B00000,
+      B00000 
+    },
+    {//Layer 4
+      B00000, 
+      B00000,
+      B00000, 
+      B00000,
+      B00000
+    }
+  };
+  
+  ShowDesignV2(frame, RunTime/frames);
+
+  //Frame2  
+  frame[0][0]=B00000;
+  frame[0][1]=B00000;
+  frame[0][2]=B00000;
+  frame[0][3]=B10000;
+  frame[0][4]=B11000;
+  
+  frame[1][0]=B00000;
+  frame[1][1]=B00000;
+  frame[1][2]=B00000;
+  frame[1][3]=B00000;
+  frame[1][4]=B10000;
+  
+  frame[2][0]=B00000;
+  frame[2][1]=B00000;
+  frame[2][2]=B00000;
+  frame[2][3]=B00000;
+  frame[2][4]=B00000;
+  
+  frame[3][0]=B00000;
+  frame[3][1]=B00000;
+  frame[3][2]=B00000;
+  frame[3][3]=B00000;
+  frame[3][4]=B00000;
+  
+  frame[4][0]=B00000;
+  frame[4][1]=B00000;
+  frame[4][2]=B00000;
+  frame[4][3]=B00000;
+  frame[4][4]=B00000;
+  
+  ShowDesignV2(frame, RunTime/frames);
+  
+  //Frame3
+  frame[0][0]=B00000;
+  frame[0][1]=B00000;
+  frame[0][2]=B10000;
+  frame[0][3]=B11000;
+  frame[0][4]=B11100;
+  
+  frame[1][0]=B00000;
+  frame[1][1]=B00000;
+  frame[1][2]=B00000;
+  frame[1][3]=B10000;
+  frame[1][4]=B11000;
+  
+  frame[2][0]=B00000;
+  frame[2][1]=B00000;
+  frame[2][2]=B00000;
+  frame[2][3]=B00000;
+  frame[2][4]=B10000;
+  
+  frame[3][0]=B00000;
+  frame[3][1]=B00000;
+  frame[3][2]=B00000;
+  frame[3][3]=B00000;
+  frame[3][4]=B00000;
+  
+  frame[4][0]=B00000;
+  frame[4][1]=B00000;
+  frame[4][2]=B00000;
+  frame[4][3]=B00000;
+  frame[4][4]=B00000;
+  ShowDesignV2(frame, RunTime/frames);
+  
+  //Frame4
+  frame[0][0]=B00000;
+  frame[0][1]=B10000;
+  frame[0][2]=B11000;
+  frame[0][3]=B11100;
+  frame[0][4]=B11110;
+  
+  frame[1][0]=B00000;
+  frame[1][1]=B00000;
+  frame[1][2]=B10000;
+  frame[1][3]=B11000;
+  frame[1][4]=B11100;
+  
+  frame[2][0]=B00000;
+  frame[2][1]=B00000;
+  frame[2][2]=B00000;
+  frame[2][3]=B10000;
+  frame[2][4]=B11000;
+  
+  frame[3][0]=B00000;
+  frame[3][1]=B00000;
+  frame[3][2]=B00000;
+  frame[3][3]=B00000;
+  frame[3][4]=B10000;
+  
+  frame[4][0]=B00000;
+  frame[4][1]=B00000;
+  frame[4][2]=B00000;
+  frame[4][3]=B00000;
+  frame[4][4]=B00000;
+  ShowDesignV2(frame, RunTime/frames);
+  
+  //Frame5
+  frame[0][0]=B10000;
+  frame[0][1]=B11000;
+  frame[0][2]=B11100;
+  frame[0][3]=B11110;
+  frame[0][4]=B11111;
+  
+  frame[1][0]=B00000;
+  frame[1][1]=B10000;
+  frame[1][2]=B11000;
+  frame[1][3]=B11100;
+  frame[1][4]=B11110;
+  
+  frame[2][0]=B00000;
+  frame[2][1]=B00000;
+  frame[2][2]=B10000;
+  frame[2][3]=B11000;
+  frame[2][4]=B11100;
+  
+  frame[3][0]=B00000;
+  frame[3][1]=B00000;
+  frame[3][2]=B00000;
+  frame[3][3]=B10000;
+  frame[3][4]=B11000;
+  
+  frame[4][0]=B00000;
+  frame[4][1]=B00000;
+  frame[4][2]=B00000;
+  frame[4][3]=B00000;
+  frame[4][4]=B10000;
+  ShowDesignV2(frame, RunTime/frames);  
+  
+    //Frame6
+  frame[0][0]=B11000;
+  frame[0][1]=B11100;
+  frame[0][2]=B11110;
+  frame[0][3]=B11111;
+  
+  frame[1][0]=B10000;
+  frame[1][1]=B11000;
+  frame[1][2]=B11100;
+  frame[1][3]=B11110;
+  frame[1][4]=B11111;
+  
+  frame[2][0]=B00000;
+  frame[2][1]=B10000;
+  frame[2][2]=B11000;
+  frame[2][3]=B11100;
+  frame[2][4]=B11110;
+  
+  frame[3][0]=B00000;
+  frame[3][1]=B00000;
+  frame[3][2]=B10000;
+  frame[3][3]=B11000;
+  frame[3][4]=B11100;
+  
+  frame[4][0]=B00000;
+  frame[4][1]=B00000;
+  frame[4][2]=B00000;
+  frame[4][3]=B10000;
+  frame[4][4]=B11000;
+  ShowDesignV2(frame, RunTime/frames); 
+  
+  //Frame7
+  frame[0][0]=B11100;
+  frame[0][1]=B11110;
+  frame[0][2]=B11111;
+  
+  frame[1][0]=B11000;
+  frame[1][1]=B11100;
+  frame[1][2]=B11110;
+  frame[1][3]=B11111;
+  
+  frame[2][0]=B10000;
+  frame[2][1]=B11000;
+  frame[2][2]=B11100;
+  frame[2][3]=B11110;
+  frame[2][4]=B11111;
+  
+  frame[3][0]=B00000;
+  frame[3][1]=B10000;
+  frame[3][2]=B11000;
+  frame[3][3]=B11100;
+  frame[3][4]=B11110;
+  
+  frame[4][0]=B00000;
+  frame[4][1]=B00000;
+  frame[4][2]=B10000;
+  frame[4][3]=B11000;
+  frame[4][4]=B11100;
+  ShowDesignV2(frame, RunTime/frames); 
+    
+  //Frame8
+  frame[0][0]=B11110;
+  frame[0][1]=B11111;
+  
+  frame[1][0]=B11100;
+  frame[1][1]=B11110;
+  frame[1][2]=B11111;
+  
+  frame[2][0]=B11000;
+  frame[2][1]=B11100;
+  frame[2][2]=B11110;
+  frame[2][3]=B11111;
+  
+  frame[3][0]=B10000;
+  frame[3][1]=B11000;
+  frame[3][2]=B11100;
+  frame[3][3]=B11110;
+  frame[3][4]=B11111;
+  
+  frame[4][0]=B00000;
+  frame[4][1]=B10000;
+  frame[4][2]=B11000;
+  frame[4][3]=B11100;
+  frame[4][4]=B11110;
+  ShowDesignV2(frame, RunTime/frames); 
+  
+  //Frame9
+  frame[0][0]=B11111;
+  
+  frame[1][0]=B11110;
+  frame[1][1]=B11111;
+  
+  frame[2][0]=B11100;
+  frame[2][1]=B11110;
+  frame[2][2]=B11111;
+  
+  frame[3][0]=B11000;
+  frame[3][1]=B11100;
+  frame[3][2]=B11110;
+  frame[3][3]=B11111;
+  
+  frame[4][0]=B10000;
+  frame[4][1]=B11000;
+  frame[4][2]=B11100;
+  frame[4][3]=B11110;
+  frame[4][4]=B11111;
+  ShowDesignV2(frame, RunTime/frames); 
+  
+  //Frame10
+  frame[1][0]=B11111;
+  
+  frame[2][0]=B11110;
+  frame[2][1]=B11111;
+  
+  frame[3][0]=B11100;
+  frame[3][1]=B11110;
+  frame[3][2]=B11111;
+  
+  frame[4][0]=B11000;
+  frame[4][1]=B11100;
+  frame[4][2]=B11110;
+  frame[4][3]=B11111;
+  ShowDesignV2(frame, RunTime/frames); 
+  
+  //Frame11
+  frame[2][0]=B11111;
+  
+  frame[3][0]=B11110;
+  frame[3][1]=B11111;
+  
+  frame[4][0]=B11100;
+  frame[4][1]=B11110;
+  frame[4][2]=B11111;
+  ShowDesignV2(frame, RunTime/frames); 
+
+  //Frame12
+  frame[3][0]=B11111;
+  
+  frame[4][0]=B11110;
+  frame[4][1]=B11111;
+  ShowDesignV2(frame, RunTime/frames);   
+  
+  //Frame13
+  frame[4][0]=B11111;
+  ShowDesignV2(frame, RunTime/frames);   
+  
+  
+}
+
   
 void DesignFirework(unsigned long RunTime) {
   // shows a column going up, then explosions with random LEDs on 2 layers and fading out
@@ -1075,7 +1402,7 @@ void DesignCheckerboardV2(unsigned long RunTime) {
       B10101, 
       B01010,
       B10101,
-      B10101 
+      B01010
     },
     {//Layer 2
       B10101, 
@@ -1089,7 +1416,7 @@ void DesignCheckerboardV2(unsigned long RunTime) {
       B10101, 
       B01010,
       B10101,
-      B10101 
+      B01010 
     },
     {//Layer 4
       B10101, 
@@ -1101,6 +1428,48 @@ void DesignCheckerboardV2(unsigned long RunTime) {
   };
   ShowDesignV2(frame, RunTime);
 }
+
+void DesignTest(unsigned long RunTime) {
+  int frame[5][5] = {
+    {//Layer 0
+      B11111, 
+      B11111,
+      B11111, 
+      B11111,
+      B11111
+    },
+    {//Layer 1
+      B11111,
+      B11111, 
+      B11111,
+      B11111,
+      B11111
+    },
+    {//Layer 2
+      B11111, 
+      B11111,
+      B11111, 
+      B11111,
+      B11111
+    },
+    {//Layer 3
+      B11111,
+      B11111, 
+      B11111,
+      B11111,
+      B11111 
+    },
+    {//Layer 4
+      B11111, 
+      B11111,
+      B11111, 
+      B11111,
+      B11111
+    }
+  };
+  ShowDesignV2(frame, RunTime);
+}
+
 
 void DesignCheckerboard(unsigned long RunTime) {
   //Every other LED in all directions
@@ -1202,23 +1571,7 @@ void ShowDesign(boolean frame[5][5][5], unsigned long RunTime) {
 void ShowDesignV2(int frame[5][5], unsigned long RunTime) {
   //Accepts a 5 array and displays the output simultaneous
   //Output is significantly dimmer than single as we are flashing off and on and limited power per layer
-  
-  /*
-  boolean frameDecoderView [5][4][8];
-     for (byte layer=0; layer<=4; layer++ {
-        for (byte row=0; row<5; ++row) {
-            //byte data = pgm_read_byte (&BitMap[x]);   // fetch data from program memory
-            for (byte y=0; y<7; ++y) {
-                if (frame[layer][row] & (1<<y)) {
-                    // turn on the LED at location (x,y)
-                } else {
-                    // turn off the LED at location (x,y)
-                }
-            }
-        }
-     }
-    */
-    
+
 unsigned long ledLine[5];
 //Take all layer and row information and put into a long array for each layer to walk through
 for (int layer=0; layer<=4; layer++) {
@@ -1228,7 +1581,13 @@ for (int layer=0; layer<=4; layer++) {
   }
   ledLine[layer] = (ledLine[layer] << 7); //Shift further over by 7 digits to fill out the space for the 4th virtual decoder
 }
-
+  /*
+  Serial.println(ledLine[0]);
+  Serial.println(ledLine[1]);
+  Serial.println(ledLine[2]);
+  Serial.println(ledLine[3]);
+  Serial.println(ledLine[4]);
+  */
   unsigned long StartTime = millis();
   unsigned long CurrentTime = millis();
   //Run through this function for the specified amount of time
@@ -1239,8 +1598,20 @@ for (int layer=0; layer<=4; layer++) {
       //Cycle through each element to see if the decoder output needs to be on, and if so, activate it  
       for (int output=0; output<=7; output++) {
         for (int decoder=0; decoder<=3; decoder++) {
-            if (ledLine[layer] & (1<<31-(decoder*8)-output)) { //Need to shift over 31 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
-          //if (ledLine[layer] & (2147483648 >>(decoder*8)+output)) //Possibly simpler to understand, as the starting point is at LED 0 and then shifting to the right
+                  /*
+                  unsigned long shift=31-(decoder*8)-output;
+                  String stringShift = " Shift ";
+                  String stringBit = " BitResult ";
+                  unsigned long BitResult = ledLine[layer] & (1<<shift);
+                  String stringDecoder = " Decoder ";
+                  String stringOutput = " Output ";
+                  String SerialOutput = stringShift + shift + stringBit + BitResult + stringDecoder + decoder + stringOutput + output;
+                  Serial.println(SerialOutput);
+                  */
+
+            //if (ledLine[layer] & (1<<shift)) { //Need to shift over 31 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
+          //if (ledLine[layer] & (1<<31-(decoder*8)-output)) { //Need to shift over 31 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
+          if (ledLine[layer] & (2147483648 >>(decoder*8)+output)) {//Possibly simpler to understand, as the starting point is at LED 0 and then shifting to the right
                   SetDecoder(decoder, output); 
                 } else {
                     //digitalWrite(EnableDecoder[decoder], LOW);
