@@ -21,24 +21,26 @@ const int Layer[5] = {5,6,9,10,11};
 const int layersTotal = 5; //Total number of layers in cube
 const int columnsTotal = 25; //Total number of columns in a layer 5x5
 
+int cubeLayout[5][5]; //A variable for keeping track of what LEDs to light up when working with patterns and designs.  
+
 //Function Prototypes to allow for default argument values
 //Must be above the Setup line? http://forum.arduino.cc/index.php/topic,40799.0.html
 void led(int targetLed, int brightness=255); 
 void SetLayer(int targetLayer, String desiredStatus="on", int brightness=255);
 void FadeLed(int targetLed, int runTime=1500, int minBrightness=0, int maxBrightness=255);
 void FadeLayer(int targetLayer, int runTime=1500, int minBrightness=0, int maxBrightness=255);
+void DesignDiagonalFillV3 (unsigned long RunTime=1000, uint8_t width=1); 
 
 
 void setup() {
   // the array elements are numbered from 0 to (pinCount - 1).
   // use a for loop to initialize each pin as an output:
-  delay(1);
   for (int thisPin = 0; thisPin < pinCount; thisPin++)  {
     pinMode(ledPins[thisPin], OUTPUT);   
     digitalWrite(ledPins[thisPin], LOW);  
   }
-  delay(1);
-  //Serial.begin(9600);
+  randomSeed(analogRead(0));
+  Serial.begin(9600);
   Serial.println("Setup Done");
 }
 
@@ -50,7 +52,7 @@ void loop() {
   //Main loop for various patterns
   int pattern = random(18);
   //Remark out the line below to run random patterns, or set the value to the pattern you want to display
-  pattern=22;
+  pattern=21;
   Serial.println(freeRam()); 
   switch(pattern) {
     case 0: 
@@ -122,8 +124,7 @@ void loop() {
        DesignCheckerboardV2(3000);
        break;
      case 21:
-       DesignTest(1000);
-       //delay(100000);
+       DesignDiagonalFillV3(1000, random(1, 14));
        break;
      case 22:
        DesignDiagonalFillV2(1000);
@@ -148,324 +149,434 @@ void loop() {
   }
 }
 
+void ClearCube () {
+  //Sets the cubeLayout variable to all 0
+  memset(cubeLayout,0,sizeof(cubeLayout));
+}
+
+void FillCube () {
+  for (byte layer=0; layer<=4; layer++) {
+    for (byte row=0; row<=4; row++) {
+      cubeLayout[layer][row]=31;
+    }
+  }
+}
+  
+
+void DesignDiagonalFillV3 (unsigned long RunTime, uint8_t width) {
+  //uint8_t steps=13+width+width+3; //Total number of steps to take when 2 swipes
+  uint8_t steps=13+width;
+  ClearCube();
+  
+  for (uint8_t pass=0; pass<=steps; pass++) {
+    //Serial.println("Copying layers up");
+    //Copy layers up, leaving Layer 0 alone
+    for (uint8_t layer=4; layer >=1; layer--) {
+      for (uint8_t row=0; row <=4; row++) {
+        cubeLayout[layer][row]=cubeLayout[layer-1][row];
+      }
+    }
+    //On Layer 0, copy rows up, leaving the bottom row alone
+    //LED 0 is on Row 4, so leaving it along to introduce changes
+    //Serial.println("Copying Rows up");
+    for (uint8_t row=0; row <=3; row++) {
+      cubeLayout[0][row]=cubeLayout[0][row+1];
+    }
+    //Serial.println("Changing Layer0 Row0 Status");
+    //For layer 0, row 4, shift the bit to the right by one and then add 16 to fill it back in, eventually filling in the row
+    if (pass==0)   cubeLayout[0][4]=B10000;
+    else if (pass<(width)) {
+      cubeLayout[0][4]>>=1; //Move the LED to the right
+      cubeLayout[0][4]+=16; //Add 16 to fill in the left most bit
+    }
+    /*
+    //Add a second swipe after a 3 frame blank
+    else if (pass>(width+2) && pass<(width+width+3)) {
+      cubeLayout[0][4]>>=1; //Move the LED to the right
+      cubeLayout[0][4]+=16; //Add 16 to fill in the left most bit
+    }
+    */
+    else cubeLayout[0][4]>>=1;
+    //Serial.println("Showing design");
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+}
+
+
+void ShowDesignV2(int frame[5][5], unsigned long RunTime) {
+  //Accepts a 5 array and displays the output simultaneous
+  //Output is significantly dimmer than single as we are flashing off and on and limited power per layer
+
+unsigned long ledLine[5];
+//Take all layer and row information and put into a long array for each layer to walk through
+for (int layer=0; layer<=4; layer++) {
+  for (int row=4; row>=0; row--) {
+    if (row == 4) ledLine[layer]=frame[layer][4]; //For first entry, set the value to the lowest row, since the decoders are connected starting at the bottom if viewed from above.
+    else ledLine[layer] = (ledLine[layer] << 5) | frame[layer][row]; //Shift the existing values to the left by 5 digits, then OR the next row into the empty area
+  }
+  ledLine[layer] = (ledLine[layer] << 7); //Shift further over by 7 digits to fill out the space for the 4th virtual decoder
+}
+  /*
+  Serial.println(RunTime);
+  Serial.println(ledLine[0]);
+  Serial.println(ledLine[1]);
+  Serial.println(ledLine[2]);
+  Serial.println(ledLine[3]);
+  Serial.println(ledLine[4]);
+  */
+  unsigned long StartTime = millis();
+  unsigned long CurrentTime = millis();
+  //Run through this function for the specified amount of time
+  while (CurrentTime - StartTime <= RunTime) {
+    /*
+    String space = " ";
+    String stringOutput=CurrentTime + space + StartTime + space + RunTime;
+    Serial.println(stringOutput);
+    */
+    for (int layer=0;layer<=4;layer++) { //Cycle through each layer
+      FullReset(); // Turn off all output to prepare for this layer
+      SetLayer(layer, "On");
+      //Cycle through each element to see if the decoder output needs to be on, and if so, activate it  
+      for (int output=0; output<=7; output++) {
+        for (int decoder=0; decoder<=3; decoder++) {
+                  /*
+                  unsigned long shift=31-(decoder*8)-output;
+                  String stringShift = " Shift ";
+                  String stringBit = " BitResult ";
+                  unsigned long BitResult = ledLine[layer] & (1<<shift);
+                  String stringDecoder = " Decoder ";
+                  String stringOutput = " Output ";
+                  String SerialOutput = stringShift + shift + stringBit + BitResult + stringDecoder + decoder + stringOutput + output;
+                  Serial.println(SerialOutput);
+                  */
+
+            //if (ledLine[layer] & (1L<<shift)) { //Need to shift over 31 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
+          //if (ledLine[layer] & (1<<31-(decoder*8)-output)) { //Need to shift over 31 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
+          if (ledLine[layer] & (2147483648 >>(decoder*8)+output)) {//Possibly simpler to understand, as the starting point is at LED 0 and then shifting to the right
+                  SetDecoder(decoder, output); 
+                } else {
+                    //digitalWrite(EnableDecoder[decoder], LOW);
+                    if (decoder <=2 ) digitalWrite(EnableDecoder[decoder], LOW);
+                    if (decoder == 3) digitalWrite(col25, LOW);
+            }
+        }
+      }
+    CurrentTime = millis();
+    }
+    FullReset();
+  }
+}
+  
+
 void DesignDiagonalFillV2(unsigned long RunTime) {
   byte frames = 13;
-  int frame[5][5] = {
-    {//Layer 0
-      B00000, 
-      B00000,
-      B00000, 
-      B00000,
-      B10000
-    },
-    {//Layer 1
-      B00000,
-      B00000, 
-      B00000,
-      B00000,
-      B00000
-    },
-    {//Layer 2
-      B00000, 
-      B00000,
-      B00000, 
-      B00000,
-      B00000
-    },
-    {//Layer 3
-      B00000,
-      B00000, 
-      B00000,
-      B00000,
-      B00000 
-    },
-    {//Layer 4
-      B00000, 
-      B00000,
-      B00000, 
-      B00000,
-      B00000
-    }
-  };
+  //Frame1  
+  cubeLayout[0][0]=B00000;
+  cubeLayout[0][1]=B00000;
+  cubeLayout[0][2]=B00000;
+  cubeLayout[0][3]=B00000;
+  cubeLayout[0][4]=B10000;
   
-  ShowDesignV2(frame, RunTime/frames);
+  cubeLayout[1][0]=B00000;
+  cubeLayout[1][1]=B00000;
+  cubeLayout[1][2]=B00000;
+  cubeLayout[1][3]=B00000;
+  cubeLayout[1][4]=B00000;
+  
+  cubeLayout[2][0]=B00000;
+  cubeLayout[2][1]=B00000;
+  cubeLayout[2][2]=B00000;
+  cubeLayout[2][3]=B00000;
+  cubeLayout[2][4]=B00000;
+  
+  cubeLayout[3][0]=B00000;
+  cubeLayout[3][1]=B00000;
+  cubeLayout[3][2]=B00000;
+  cubeLayout[3][3]=B00000;
+  cubeLayout[3][4]=B00000;
+  
+  cubeLayout[4][0]=B00000;
+  cubeLayout[4][1]=B00000;
+  cubeLayout[4][2]=B00000;
+  cubeLayout[4][3]=B00000;
+  cubeLayout[4][4]=B00000;
+  
+  ShowDesignV2(cubeLayout, RunTime/frames);
 
   //Frame2  
-  frame[0][0]=B00000;
-  frame[0][1]=B00000;
-  frame[0][2]=B00000;
-  frame[0][3]=B10000;
-  frame[0][4]=B11000;
+  cubeLayout[0][0]=B00000;
+  cubeLayout[0][1]=B00000;
+  cubeLayout[0][2]=B00000;
+  cubeLayout[0][3]=B10000;
+  cubeLayout[0][4]=B11000;
   
-  frame[1][0]=B00000;
-  frame[1][1]=B00000;
-  frame[1][2]=B00000;
-  frame[1][3]=B00000;
-  frame[1][4]=B10000;
+  cubeLayout[1][0]=B00000;
+  cubeLayout[1][1]=B00000;
+  cubeLayout[1][2]=B00000;
+  cubeLayout[1][3]=B00000;
+  cubeLayout[1][4]=B10000;
   
-  frame[2][0]=B00000;
-  frame[2][1]=B00000;
-  frame[2][2]=B00000;
-  frame[2][3]=B00000;
-  frame[2][4]=B00000;
+  cubeLayout[2][0]=B00000;
+  cubeLayout[2][1]=B00000;
+  cubeLayout[2][2]=B00000;
+  cubeLayout[2][3]=B00000;
+  cubeLayout[2][4]=B00000;
   
-  frame[3][0]=B00000;
-  frame[3][1]=B00000;
-  frame[3][2]=B00000;
-  frame[3][3]=B00000;
-  frame[3][4]=B00000;
+  cubeLayout[3][0]=B00000;
+  cubeLayout[3][1]=B00000;
+  cubeLayout[3][2]=B00000;
+  cubeLayout[3][3]=B00000;
+  cubeLayout[3][4]=B00000;
   
-  frame[4][0]=B00000;
-  frame[4][1]=B00000;
-  frame[4][2]=B00000;
-  frame[4][3]=B00000;
-  frame[4][4]=B00000;
+  cubeLayout[4][0]=B00000;
+  cubeLayout[4][1]=B00000;
+  cubeLayout[4][2]=B00000;
+  cubeLayout[4][3]=B00000;
+  cubeLayout[4][4]=B00000;
   
-  ShowDesignV2(frame, RunTime/frames);
+  ShowDesignV2(cubeLayout, RunTime/frames);
   
   //Frame3
-  frame[0][0]=B00000;
-  frame[0][1]=B00000;
-  frame[0][2]=B10000;
-  frame[0][3]=B11000;
-  frame[0][4]=B11100;
+  cubeLayout[0][0]=B00000;
+  cubeLayout[0][1]=B00000;
+  cubeLayout[0][2]=B10000;
+  cubeLayout[0][3]=B11000;
+  cubeLayout[0][4]=B11100;
   
-  frame[1][0]=B00000;
-  frame[1][1]=B00000;
-  frame[1][2]=B00000;
-  frame[1][3]=B10000;
-  frame[1][4]=B11000;
+  cubeLayout[1][0]=B00000;
+  cubeLayout[1][1]=B00000;
+  cubeLayout[1][2]=B00000;
+  cubeLayout[1][3]=B10000;
+  cubeLayout[1][4]=B11000;
   
-  frame[2][0]=B00000;
-  frame[2][1]=B00000;
-  frame[2][2]=B00000;
-  frame[2][3]=B00000;
-  frame[2][4]=B10000;
+  cubeLayout[2][0]=B00000;
+  cubeLayout[2][1]=B00000;
+  cubeLayout[2][2]=B00000;
+  cubeLayout[2][3]=B00000;
+  cubeLayout[2][4]=B10000;
   
-  frame[3][0]=B00000;
-  frame[3][1]=B00000;
-  frame[3][2]=B00000;
-  frame[3][3]=B00000;
-  frame[3][4]=B00000;
+  cubeLayout[3][0]=B00000;
+  cubeLayout[3][1]=B00000;
+  cubeLayout[3][2]=B00000;
+  cubeLayout[3][3]=B00000;
+  cubeLayout[3][4]=B00000;
   
-  frame[4][0]=B00000;
-  frame[4][1]=B00000;
-  frame[4][2]=B00000;
-  frame[4][3]=B00000;
-  frame[4][4]=B00000;
-  ShowDesignV2(frame, RunTime/frames);
+  cubeLayout[4][0]=B00000;
+  cubeLayout[4][1]=B00000;
+  cubeLayout[4][2]=B00000;
+  cubeLayout[4][3]=B00000;
+  cubeLayout[4][4]=B00000;
+  ShowDesignV2(cubeLayout, RunTime/frames);
   
   //Frame4
-  frame[0][0]=B00000;
-  frame[0][1]=B10000;
-  frame[0][2]=B11000;
-  frame[0][3]=B11100;
-  frame[0][4]=B11110;
+  cubeLayout[0][0]=B00000;
+  cubeLayout[0][1]=B10000;
+  cubeLayout[0][2]=B11000;
+  cubeLayout[0][3]=B11100;
+  cubeLayout[0][4]=B11110;
   
-  frame[1][0]=B00000;
-  frame[1][1]=B00000;
-  frame[1][2]=B10000;
-  frame[1][3]=B11000;
-  frame[1][4]=B11100;
+  cubeLayout[1][0]=B00000;
+  cubeLayout[1][1]=B00000;
+  cubeLayout[1][2]=B10000;
+  cubeLayout[1][3]=B11000;
+  cubeLayout[1][4]=B11100;
   
-  frame[2][0]=B00000;
-  frame[2][1]=B00000;
-  frame[2][2]=B00000;
-  frame[2][3]=B10000;
-  frame[2][4]=B11000;
+  cubeLayout[2][0]=B00000;
+  cubeLayout[2][1]=B00000;
+  cubeLayout[2][2]=B00000;
+  cubeLayout[2][3]=B10000;
+  cubeLayout[2][4]=B11000;
   
-  frame[3][0]=B00000;
-  frame[3][1]=B00000;
-  frame[3][2]=B00000;
-  frame[3][3]=B00000;
-  frame[3][4]=B10000;
+  cubeLayout[3][0]=B00000;
+  cubeLayout[3][1]=B00000;
+  cubeLayout[3][2]=B00000;
+  cubeLayout[3][3]=B00000;
+  cubeLayout[3][4]=B10000;
   
-  frame[4][0]=B00000;
-  frame[4][1]=B00000;
-  frame[4][2]=B00000;
-  frame[4][3]=B00000;
-  frame[4][4]=B00000;
-  ShowDesignV2(frame, RunTime/frames);
+  cubeLayout[4][0]=B00000;
+  cubeLayout[4][1]=B00000;
+  cubeLayout[4][2]=B00000;
+  cubeLayout[4][3]=B00000;
+  cubeLayout[4][4]=B00000;
+  ShowDesignV2(cubeLayout, RunTime/frames);
   
   //Frame5
-  frame[0][0]=B10000;
-  frame[0][1]=B11000;
-  frame[0][2]=B11100;
-  frame[0][3]=B11110;
-  frame[0][4]=B11111;
+  cubeLayout[0][0]=B10000;
+  cubeLayout[0][1]=B11000;
+  cubeLayout[0][2]=B11100;
+  cubeLayout[0][3]=B11110;
+  cubeLayout[0][4]=B11111;
   
-  frame[1][0]=B00000;
-  frame[1][1]=B10000;
-  frame[1][2]=B11000;
-  frame[1][3]=B11100;
-  frame[1][4]=B11110;
+  cubeLayout[1][0]=B00000;
+  cubeLayout[1][1]=B10000;
+  cubeLayout[1][2]=B11000;
+  cubeLayout[1][3]=B11100;
+  cubeLayout[1][4]=B11110;
   
-  frame[2][0]=B00000;
-  frame[2][1]=B00000;
-  frame[2][2]=B10000;
-  frame[2][3]=B11000;
-  frame[2][4]=B11100;
+  cubeLayout[2][0]=B00000;
+  cubeLayout[2][1]=B00000;
+  cubeLayout[2][2]=B10000;
+  cubeLayout[2][3]=B11000;
+  cubeLayout[2][4]=B11100;
   
-  frame[3][0]=B00000;
-  frame[3][1]=B00000;
-  frame[3][2]=B00000;
-  frame[3][3]=B10000;
-  frame[3][4]=B11000;
+  cubeLayout[3][0]=B00000;
+  cubeLayout[3][1]=B00000;
+  cubeLayout[3][2]=B00000;
+  cubeLayout[3][3]=B10000;
+  cubeLayout[3][4]=B11000;
   
-  frame[4][0]=B00000;
-  frame[4][1]=B00000;
-  frame[4][2]=B00000;
-  frame[4][3]=B00000;
-  frame[4][4]=B10000;
-  ShowDesignV2(frame, RunTime/frames);  
+  cubeLayout[4][0]=B00000;
+  cubeLayout[4][1]=B00000;
+  cubeLayout[4][2]=B00000;
+  cubeLayout[4][3]=B00000;
+  cubeLayout[4][4]=B10000;
+  ShowDesignV2(cubeLayout, RunTime/frames);  
   
     //Frame6
-  frame[0][0]=B11000;
-  frame[0][1]=B11100;
-  frame[0][2]=B11110;
-  frame[0][3]=B11111;
+  cubeLayout[0][0]=B11000;
+  cubeLayout[0][1]=B11100;
+  cubeLayout[0][2]=B11110;
+  cubeLayout[0][3]=B11111;
   
-  frame[1][0]=B10000;
-  frame[1][1]=B11000;
-  frame[1][2]=B11100;
-  frame[1][3]=B11110;
-  frame[1][4]=B11111;
+  cubeLayout[1][0]=B10000;
+  cubeLayout[1][1]=B11000;
+  cubeLayout[1][2]=B11100;
+  cubeLayout[1][3]=B11110;
+  cubeLayout[1][4]=B11111;
   
-  frame[2][0]=B00000;
-  frame[2][1]=B10000;
-  frame[2][2]=B11000;
-  frame[2][3]=B11100;
-  frame[2][4]=B11110;
+  cubeLayout[2][0]=B00000;
+  cubeLayout[2][1]=B10000;
+  cubeLayout[2][2]=B11000;
+  cubeLayout[2][3]=B11100;
+  cubeLayout[2][4]=B11110;
   
-  frame[3][0]=B00000;
-  frame[3][1]=B00000;
-  frame[3][2]=B10000;
-  frame[3][3]=B11000;
-  frame[3][4]=B11100;
+  cubeLayout[3][0]=B00000;
+  cubeLayout[3][1]=B00000;
+  cubeLayout[3][2]=B10000;
+  cubeLayout[3][3]=B11000;
+  cubeLayout[3][4]=B11100;
   
-  frame[4][0]=B00000;
-  frame[4][1]=B00000;
-  frame[4][2]=B00000;
-  frame[4][3]=B10000;
-  frame[4][4]=B11000;
-  ShowDesignV2(frame, RunTime/frames); 
+  cubeLayout[4][0]=B00000;
+  cubeLayout[4][1]=B00000;
+  cubeLayout[4][2]=B00000;
+  cubeLayout[4][3]=B10000;
+  cubeLayout[4][4]=B11000;
+  ShowDesignV2(cubeLayout, RunTime/frames); 
   
   //Frame7
-  frame[0][0]=B11100;
-  frame[0][1]=B11110;
-  frame[0][2]=B11111;
+  cubeLayout[0][0]=B11100;
+  cubeLayout[0][1]=B11110;
+  cubeLayout[0][2]=B11111;
   
-  frame[1][0]=B11000;
-  frame[1][1]=B11100;
-  frame[1][2]=B11110;
-  frame[1][3]=B11111;
+  cubeLayout[1][0]=B11000;
+  cubeLayout[1][1]=B11100;
+  cubeLayout[1][2]=B11110;
+  cubeLayout[1][3]=B11111;
   
-  frame[2][0]=B10000;
-  frame[2][1]=B11000;
-  frame[2][2]=B11100;
-  frame[2][3]=B11110;
-  frame[2][4]=B11111;
+  cubeLayout[2][0]=B10000;
+  cubeLayout[2][1]=B11000;
+  cubeLayout[2][2]=B11100;
+  cubeLayout[2][3]=B11110;
+  cubeLayout[2][4]=B11111;
   
-  frame[3][0]=B00000;
-  frame[3][1]=B10000;
-  frame[3][2]=B11000;
-  frame[3][3]=B11100;
-  frame[3][4]=B11110;
+  cubeLayout[3][0]=B00000;
+  cubeLayout[3][1]=B10000;
+  cubeLayout[3][2]=B11000;
+  cubeLayout[3][3]=B11100;
+  cubeLayout[3][4]=B11110;
   
-  frame[4][0]=B00000;
-  frame[4][1]=B00000;
-  frame[4][2]=B10000;
-  frame[4][3]=B11000;
-  frame[4][4]=B11100;
-  ShowDesignV2(frame, RunTime/frames); 
+  cubeLayout[4][0]=B00000;
+  cubeLayout[4][1]=B00000;
+  cubeLayout[4][2]=B10000;
+  cubeLayout[4][3]=B11000;
+  cubeLayout[4][4]=B11100;
+  ShowDesignV2(cubeLayout, RunTime/frames); 
     
   //Frame8
-  frame[0][0]=B11110;
-  frame[0][1]=B11111;
+  cubeLayout[0][0]=B11110;
+  cubeLayout[0][1]=B11111;
   
-  frame[1][0]=B11100;
-  frame[1][1]=B11110;
-  frame[1][2]=B11111;
+  cubeLayout[1][0]=B11100;
+  cubeLayout[1][1]=B11110;
+  cubeLayout[1][2]=B11111;
   
-  frame[2][0]=B11000;
-  frame[2][1]=B11100;
-  frame[2][2]=B11110;
-  frame[2][3]=B11111;
+  cubeLayout[2][0]=B11000;
+  cubeLayout[2][1]=B11100;
+  cubeLayout[2][2]=B11110;
+  cubeLayout[2][3]=B11111;
   
-  frame[3][0]=B10000;
-  frame[3][1]=B11000;
-  frame[3][2]=B11100;
-  frame[3][3]=B11110;
-  frame[3][4]=B11111;
+  cubeLayout[3][0]=B10000;
+  cubeLayout[3][1]=B11000;
+  cubeLayout[3][2]=B11100;
+  cubeLayout[3][3]=B11110;
+  cubeLayout[3][4]=B11111;
   
-  frame[4][0]=B00000;
-  frame[4][1]=B10000;
-  frame[4][2]=B11000;
-  frame[4][3]=B11100;
-  frame[4][4]=B11110;
-  ShowDesignV2(frame, RunTime/frames); 
+  cubeLayout[4][0]=B00000;
+  cubeLayout[4][1]=B10000;
+  cubeLayout[4][2]=B11000;
+  cubeLayout[4][3]=B11100;
+  cubeLayout[4][4]=B11110;
+  ShowDesignV2(cubeLayout, RunTime/frames); 
   
   //Frame9
-  frame[0][0]=B11111;
+  cubeLayout[0][0]=B11111;
   
-  frame[1][0]=B11110;
-  frame[1][1]=B11111;
+  cubeLayout[1][0]=B11110;
+  cubeLayout[1][1]=B11111;
   
-  frame[2][0]=B11100;
-  frame[2][1]=B11110;
-  frame[2][2]=B11111;
+  cubeLayout[2][0]=B11100;
+  cubeLayout[2][1]=B11110;
+  cubeLayout[2][2]=B11111;
   
-  frame[3][0]=B11000;
-  frame[3][1]=B11100;
-  frame[3][2]=B11110;
-  frame[3][3]=B11111;
+  cubeLayout[3][0]=B11000;
+  cubeLayout[3][1]=B11100;
+  cubeLayout[3][2]=B11110;
+  cubeLayout[3][3]=B11111;
   
-  frame[4][0]=B10000;
-  frame[4][1]=B11000;
-  frame[4][2]=B11100;
-  frame[4][3]=B11110;
-  frame[4][4]=B11111;
-  ShowDesignV2(frame, RunTime/frames); 
+  cubeLayout[4][0]=B10000;
+  cubeLayout[4][1]=B11000;
+  cubeLayout[4][2]=B11100;
+  cubeLayout[4][3]=B11110;
+  cubeLayout[4][4]=B11111;
+  ShowDesignV2(cubeLayout, RunTime/frames); 
   
   //Frame10
-  frame[1][0]=B11111;
+  cubeLayout[1][0]=B11111;
   
-  frame[2][0]=B11110;
-  frame[2][1]=B11111;
+  cubeLayout[2][0]=B11110;
+  cubeLayout[2][1]=B11111;
   
-  frame[3][0]=B11100;
-  frame[3][1]=B11110;
-  frame[3][2]=B11111;
+  cubeLayout[3][0]=B11100;
+  cubeLayout[3][1]=B11110;
+  cubeLayout[3][2]=B11111;
   
-  frame[4][0]=B11000;
-  frame[4][1]=B11100;
-  frame[4][2]=B11110;
-  frame[4][3]=B11111;
-  ShowDesignV2(frame, RunTime/frames); 
+  cubeLayout[4][0]=B11000;
+  cubeLayout[4][1]=B11100;
+  cubeLayout[4][2]=B11110;
+  cubeLayout[4][3]=B11111;
+  ShowDesignV2(cubeLayout, RunTime/frames); 
   
   //Frame11
-  frame[2][0]=B11111;
+  cubeLayout[2][0]=B11111;
   
-  frame[3][0]=B11110;
-  frame[3][1]=B11111;
+  cubeLayout[3][0]=B11110;
+  cubeLayout[3][1]=B11111;
   
-  frame[4][0]=B11100;
-  frame[4][1]=B11110;
-  frame[4][2]=B11111;
-  ShowDesignV2(frame, RunTime/frames); 
+  cubeLayout[4][0]=B11100;
+  cubeLayout[4][1]=B11110;
+  cubeLayout[4][2]=B11111;
+  ShowDesignV2(cubeLayout, RunTime/frames); 
 
   //Frame12
-  frame[3][0]=B11111;
+  cubeLayout[3][0]=B11111;
   
-  frame[4][0]=B11110;
-  frame[4][1]=B11111;
-  ShowDesignV2(frame, RunTime/frames);   
+  cubeLayout[4][0]=B11110;
+  cubeLayout[4][1]=B11111;
+  ShowDesignV2(cubeLayout, RunTime/frames);   
   
   //Frame13
-  frame[4][0]=B11111;
-  ShowDesignV2(frame, RunTime/frames);   
-  
-  
+  cubeLayout[4][0]=B11111;
+  ShowDesignV2(cubeLayout, RunTime/frames);   
 }
 
   
@@ -1389,85 +1500,37 @@ void DesignPerim(unsigned long RunTime) {
 }
 
 void DesignCheckerboardV2(unsigned long RunTime) {
-  int frame[5][5] = {
-    {//Layer 0
-      B10101, 
-      B01010,
-      B10101, 
-      B01010,
-      B10101
-    },
-    {//Layer 1
-      B01010,
-      B10101, 
-      B01010,
-      B10101,
-      B01010
-    },
-    {//Layer 2
-      B10101, 
-      B01010,
-      B10101, 
-      B01010,
-      B10101
-    },
-    {//Layer 3
-      B01010,
-      B10101, 
-      B01010,
-      B10101,
-      B01010 
-    },
-    {//Layer 4
-      B10101, 
-      B01010,
-      B10101, 
-      B01010,
-      B10101
-    }
-  };
-  ShowDesignV2(frame, RunTime);
-}
-
-void DesignTest(unsigned long RunTime) {
-  int frame[5][5] = {
-    {//Layer 0
-      B11111, 
-      B11111,
-      B11111, 
-      B11111,
-      B11111
-    },
-    {//Layer 1
-      B11111,
-      B11111, 
-      B11111,
-      B11111,
-      B11111
-    },
-    {//Layer 2
-      B11111, 
-      B11111,
-      B11111, 
-      B11111,
-      B11111
-    },
-    {//Layer 3
-      B11111,
-      B11111, 
-      B11111,
-      B11111,
-      B11111 
-    },
-    {//Layer 4
-      B11111, 
-      B11111,
-      B11111, 
-      B11111,
-      B11111
-    }
-  };
-  ShowDesignV2(frame, RunTime);
+  //Layer 0
+  cubeLayout[0][0]=B10101;
+  cubeLayout[0][1]=B01010;
+  cubeLayout[0][2]=B10101;
+  cubeLayout[0][3]=B01010;
+  cubeLayout[0][4]=B10101;
+   //Layer 1
+  cubeLayout[1][0]=B01010;
+  cubeLayout[1][1]=B10101;
+  cubeLayout[1][2]=B01010;
+  cubeLayout[1][3]=B10101;
+  cubeLayout[1][4]=B01010;
+    //Layer 2
+  cubeLayout[2][0]=B10101;
+  cubeLayout[2][1]=B01010;
+  cubeLayout[2][2]=B10101;
+  cubeLayout[2][3]=B01010;
+  cubeLayout[2][4]=B10101;
+    //Layer 3
+  cubeLayout[3][0]=B01010;
+  cubeLayout[3][1]=B10101;
+  cubeLayout[3][2]=B01010;
+  cubeLayout[3][3]=B10101;
+  cubeLayout[3][4]=B01010;
+    //Layer 4
+  cubeLayout[4][0]=B10101;
+  cubeLayout[4][1]=B01010;
+  cubeLayout[4][2]=B10101;
+  cubeLayout[4][3]=B01010;
+  cubeLayout[4][4]=B10101;
+  ShowDesignV2(cubeLayout, RunTime);
 }
 
 
@@ -1568,64 +1631,6 @@ void ShowDesign(boolean frame[5][5][5], unsigned long RunTime) {
 
 
 
-void ShowDesignV2(int frame[5][5], unsigned long RunTime) {
-  //Accepts a 5 array and displays the output simultaneous
-  //Output is significantly dimmer than single as we are flashing off and on and limited power per layer
-
-unsigned long ledLine[5];
-//Take all layer and row information and put into a long array for each layer to walk through
-for (int layer=0; layer<=4; layer++) {
-  for (int row=4; row>=0; row--) {
-    if (row == 4) ledLine[layer]=frame[layer][4]; //For first entry, set the value to the lowest row, since the decoders are connected starting at the bottom if viewed from above.
-    else ledLine[layer] = (ledLine[layer] << 5) | frame[layer][row]; //Shift the existing values to the left by 5 digits, then OR the next row into the empty area
-  }
-  ledLine[layer] = (ledLine[layer] << 7); //Shift further over by 7 digits to fill out the space for the 4th virtual decoder
-}
-  /*
-  Serial.println(ledLine[0]);
-  Serial.println(ledLine[1]);
-  Serial.println(ledLine[2]);
-  Serial.println(ledLine[3]);
-  Serial.println(ledLine[4]);
-  */
-  unsigned long StartTime = millis();
-  unsigned long CurrentTime = millis();
-  //Run through this function for the specified amount of time
-  while (CurrentTime - StartTime <= RunTime) {
-    for (int layer=0;layer<=4;layer++) { //Cycle through each layer
-      FullReset(); // Turn off all output to prepare for this layer
-      SetLayer(layer, "On");
-      //Cycle through each element to see if the decoder output needs to be on, and if so, activate it  
-      for (int output=0; output<=7; output++) {
-        for (int decoder=0; decoder<=3; decoder++) {
-                  /*
-                  unsigned long shift=31-(decoder*8)-output;
-                  String stringShift = " Shift ";
-                  String stringBit = " BitResult ";
-                  unsigned long BitResult = ledLine[layer] & (1<<shift);
-                  String stringDecoder = " Decoder ";
-                  String stringOutput = " Output ";
-                  String SerialOutput = stringShift + shift + stringBit + BitResult + stringDecoder + decoder + stringOutput + output;
-                  Serial.println(SerialOutput);
-                  */
-
-            //if (ledLine[layer] & (1<<shift)) { //Need to shift over 31 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
-          //if (ledLine[layer] & (1<<31-(decoder*8)-output)) { //Need to shift over 31 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
-          if (ledLine[layer] & (2147483648 >>(decoder*8)+output)) {//Possibly simpler to understand, as the starting point is at LED 0 and then shifting to the right
-                  SetDecoder(decoder, output); 
-                } else {
-                    //digitalWrite(EnableDecoder[decoder], LOW);
-                    if (decoder <=2 ) digitalWrite(EnableDecoder[decoder], LOW);
-                    if (decoder == 3) digitalWrite(col25, LOW);
-            }
-        }
-      }
-    CurrentTime = millis();
-    }
-    FullReset();
-  }
-}
-  
 
 void FadeLed(int targetLed, int runTime, int minBrightness, int maxBrightness) {
   //Calculate which layer needs to be used
