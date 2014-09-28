@@ -30,6 +30,7 @@ void SetLayer(int targetLayer, String desiredStatus="on", int brightness=255);
 void FadeLed(int targetLed, int runTime=1500, int minBrightness=0, int maxBrightness=255);
 void FadeLayer(int targetLayer, int runTime=1500, int minBrightness=0, int maxBrightness=255);
 void DesignDiagonalFillV3 (unsigned long RunTime=1000, uint8_t width=1); 
+void TransformCube(uint8_t transformDirection, uint8_t wrap=0);
 
 
 void setup() {
@@ -129,7 +130,7 @@ void loop() {
      case 22:
        DesignDiagonalFillV2(1000);
        break;
-    case 9000: 
+    case 9001: 
       LayerWalk(25);
       WalkLayerUpDown(25);
       WalkLayerUpDownReverse(25);
@@ -149,12 +150,55 @@ void loop() {
   }
 }
 
+
+void TransformCube(uint8_t transformDirection, uint8_t wrap) {
+  uint8_t temp[5]; //Create a temp table to hold the data for wrapping before overwriting
+  if (transformDirection==1) { //Move the layers up
+    if(wrap==1) { //Wrap layer 4 around to Layer 0
+      for (uint8_t row=0; row<=4; row++) temp[row]=cubeLayout[4][row]; //Store the values of layer 4 in the temp array
+    } 
+    for (uint8_t layer=4; layer >=1; layer--) {
+    for (uint8_t row=0; row <=4; row++) {
+      cubeLayout[layer][row]=cubeLayout[layer-1][row]; //Copy each row in a layer from the previous layer
+      }
+    }
+    if (wrap==1) for (uint8_t row=0; row<=4; row++) cubeLayout[0][row]=temp[row]; //Use the values in temp to populate Layer 0 which used to be 4
+    if (wrap==2) for (uint8_t row=0; row<=4; row++) cubeLayout[0][row]=0; //Clear out Layer0
+  }
+  
+  if (transformDirection==-1) { //Move the layers down
+    if(wrap==1) { //Wrap layer 4 around to Layer 0
+      for (uint8_t row=0; row<=4; row++) temp[row]=cubeLayout[0][row]; //Store the values of layer 0 in the temp array
+    } 
+    for (uint8_t layer=0; layer >=3; layer++) {
+    for (uint8_t row=0; row <=4; row++) {
+      cubeLayout[layer][row]=cubeLayout[layer+1][row]; //Copy each row in a layer from the above layer
+      }
+    }
+    if (wrap==1) for (uint8_t row=0; row<=4; row++) cubeLayout[4][row]=temp[row]; //Use the values in temp to populate Layer 4 which used to be 0
+    if (wrap==2) for (uint8_t row=0; row<=4; row++) cubeLayout[4][row]=0; //Clear out Layer4
+  }
+  
+  if (transformDirection==4) { //Move the cube forward
+    if(wrap==1) for (uint8_t layer=0; layer<=4; layer++) temp[layer]=cubeLayout[layer][0]; //Store values of row 0 in the temp array
+    for (uint8_t row=0; row<=3; row++) {
+      for (uint8_t layer=0; layer<=4; layer++) {
+        cubeLayout[layer][row]=cubeLayout[layer][row+1];
+      }
+    }
+    if (wrap==1) for (uint8_t layer=0; layer<=4; layer++) cubeLayout[layer][4]=temp[layer]; //Use the values in temp to populate row 4 which used to be 0
+    if (wrap==2) for (uint8_t layer=0; layer<=4; layer++) cubeLayout[layer][4]=0; //Clear out Layer4
+  }
+}
+
+
 void ClearCube () {
   //Sets the cubeLayout variable to all 0
   memset(cubeLayout,0,sizeof(cubeLayout));
 }
 
 void FillCube () {
+  //Turns on all LEDs for the cube
   for (byte layer=0; layer<=4; layer++) {
     for (byte row=0; row<=4; row++) {
       cubeLayout[layer][row]=31;
@@ -166,10 +210,9 @@ void FillCube () {
 void DesignDiagonalFillV3 (unsigned long RunTime, uint8_t width) {
   //uint8_t steps=13+width+width+3; //Total number of steps to take when 2 swipes
   uint8_t steps=13+width;
-  ClearCube();
+  ClearCube(); //Turn off the cube output before adding new pattern
   
   for (uint8_t pass=0; pass<=steps; pass++) {
-    //Serial.println("Copying layers up");
     //Copy layers up, leaving Layer 0 alone
     for (uint8_t layer=4; layer >=1; layer--) {
       for (uint8_t row=0; row <=4; row++) {
@@ -178,13 +221,11 @@ void DesignDiagonalFillV3 (unsigned long RunTime, uint8_t width) {
     }
     //On Layer 0, copy rows up, leaving the bottom row alone
     //LED 0 is on Row 4, so leaving it along to introduce changes
-    //Serial.println("Copying Rows up");
     for (uint8_t row=0; row <=3; row++) {
       cubeLayout[0][row]=cubeLayout[0][row+1];
     }
-    //Serial.println("Changing Layer0 Row0 Status");
     //For layer 0, row 4, shift the bit to the right by one and then add 16 to fill it back in, eventually filling in the row
-    if (pass==0)   cubeLayout[0][4]=B10000;
+    if (pass==0) cubeLayout[0][4]=B10000; //On the first pass, start with LED 0
     else if (pass<(width)) {
       cubeLayout[0][4]>>=1; //Move the LED to the right
       cubeLayout[0][4]+=16; //Add 16 to fill in the left most bit
@@ -249,8 +290,6 @@ for (int layer=0; layer<=4; layer++) {
                   String SerialOutput = stringShift + shift + stringBit + BitResult + stringDecoder + decoder + stringOutput + output;
                   Serial.println(SerialOutput);
                   */
-
-            //if (ledLine[layer] & (1L<<shift)) { //Need to shift over 31 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
           //if (ledLine[layer] & (1<<31-(decoder*8)-output)) { //Need to shift over 31 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
           if (ledLine[layer] & (2147483648 >>(decoder*8)+output)) {//Possibly simpler to understand, as the starting point is at LED 0 and then shifting to the right
                   SetDecoder(decoder, output); 
