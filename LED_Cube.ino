@@ -53,7 +53,7 @@ void loop() {
   //Main loop for various patterns
   int pattern = random(18);
   //Remark out the line below to run random patterns, or set the value to the pattern you want to display
-  pattern=23;
+  pattern=24;
   Serial.println(freeRam()); 
   switch(pattern) {
     case 0: 
@@ -131,8 +131,12 @@ void loop() {
        DesignDiagonalFillV2(1000);
        break;
      case 23:
-       DesignMoveTest(2000);
+       DesignMoveTest(5000);
        break;
+     case 24:
+       DesignMiniCubeDance(50000);
+       break;
+       
     case 9001: 
       LayerWalk(25);
       WalkLayerUpDown(25);
@@ -153,8 +157,24 @@ void loop() {
   }
 }
 
+void DesignMiniCubeDance (unsigned long RunTime) {
+  uint8_t steps = RunTime/250;
+  ClearCube();
+  //Start with a cube in the middle
+  cubeLayout[2][2]=B00110;
+  cubeLayout[2][3]=B00110;
+  cubeLayout[3][2]=B00110;
+  cubeLayout[3][3]=B00110;
+  ShowDesignV2(cubeLayout, RunTime/steps);
+  for (uint8_t pass=0; pass<=steps; pass++) {
+    TransformCube(random(1, 6), 1);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+}
+
+
 void DesignMoveTest (unsigned long RunTime) {
-  uint8_t steps=8;
+  uint8_t steps=16;
   ClearCube();
   cubeLayout[2][2]=B00110;
   cubeLayout[2][3]=B00110;
@@ -180,11 +200,20 @@ void DesignMoveTest (unsigned long RunTime) {
   ShowDesignV2(cubeLayout, RunTime/steps); 
   TransformCube(5);
   ShowDesignV2(cubeLayout, RunTime/steps); 
+  TransformCube(6);
+  ShowDesignV2(cubeLayout, RunTime/steps); 
+  TransformCube(6);
+  ShowDesignV2(cubeLayout, RunTime/steps); 
+    TransformCube(4);
+  ShowDesignV2(cubeLayout, RunTime/steps); 
 
-  TransformCube(6);
+  TransformCube(4,1);
   ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(6);
+    TransformCube(4,1);
   ShowDesignV2(cubeLayout, RunTime/steps); 
+  TransformCube(4,1);
+  ShowDesignV2(cubeLayout, RunTime/steps); 
+
 }
 
 void TransformCube(uint8_t transformDirection, uint8_t wrap) {
@@ -218,15 +247,33 @@ void TransformCube(uint8_t transformDirection, uint8_t wrap) {
     if (wrap==1) for (uint8_t row=0; row<=4; row++) cubeLayout[4][row]=temp[row]; //Use the values in temp to populate Layer 4 which used to be 0
     if (wrap==0) for (uint8_t row=0; row<=4; row++) cubeLayout[4][row]=0; //Clear out Layer4
   }
-  
-  if (transformDirection==3) { //Move the cube to the left
-    //Code
-  }
-  
-  if (transformDirection==4) { //Move tthe cube to the right
-    //Code
-  }
-  
+
+
+    if(transformDirection==3) { //Move the cube to the left
+      for(int layer=0; layer<=4; ++layer) {
+        for(int row=0; row<=4; ++row) {
+          uint8_t bits = cubeLayout[layer][row]; //Temp variable for working with bit shifts
+	  bits <<= 1; //Shift all bits for this row to the left by one.  Will leave a 0 on the far right and an extra digit outside of the scope on the left
+	  if(wrap==1) bits |= bits >> 5; //When wrapping, use the bitwise OR along with an instance of the row shifted to the right by 5 digits, leaving only what used to be the left most bit
+          bits &= B11111; //Use bitwise AND along with all 1 bits to limit only the right most 5 bits, dropping off anything that was shifted to the left and would be remaining
+	  cubeLayout[layer][row] = bits; //Update the cube data with this updated row that has been shifted to the left
+        }
+      }
+    }
+    
+    if(transformDirection == 4) { //Move the dube to the right
+    //Need to figure out how to leave the right most bit alone for wrap mode 2
+      for(int layer=0; layer<=4; ++layer) {
+        for(int row=0; row<=4; ++row) {
+          uint8_t bits = cubeLayout[layer][row]; //temp variable for working with the bit shifts
+          uint8_t temp = bits & 1; //Save the current value of the right most bit to another temp location in the event of wrapping
+          bits >>= 1; //Move all bits in the row to the right by one position, dropping off the right most digit, which is saved in tmp
+          if(wrap==1) bits |= temp << 4; //If wrapping is desired, then use bitwise OR along with the tmp value shifted to the left 4 positions, putting it in the left most
+          cubeLayout[layer][row] = bits; //Update the cube data with this updated row that has been shifted to the right
+        }
+      }
+    }
+
   if (transformDirection==5) { //Move the cube forward
     if(wrap==1) for (uint8_t layer=0; layer<=4; layer++) temp[layer]=cubeLayout[layer][0]; //Store values of row 0 in the temp array
     for (uint8_t row=0; row<=3; row++) {
