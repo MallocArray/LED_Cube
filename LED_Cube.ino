@@ -53,7 +53,7 @@ void loop() {
   //Main loop for various patterns
   int pattern = random(18);
   //Remark out the line below to run random patterns, or set the value to the pattern you want to display
-  pattern=21;
+  pattern=23;
   Serial.println(freeRam()); 
   switch(pattern) {
     case 0: 
@@ -130,6 +130,9 @@ void loop() {
      case 22:
        DesignDiagonalFillV2(1000);
        break;
+     case 23:
+       DesignMoveTest(2000);
+       break;
     case 9001: 
       LayerWalk(25);
       WalkLayerUpDown(25);
@@ -150,8 +153,35 @@ void loop() {
   }
 }
 
+void DesignMoveTest (unsigned long RunTime) {
+  uint8_t steps=8;
+  ClearCube();
+  cubeLayout[2][2]=B00110;
+  cubeLayout[2][3]=B00110;
+  cubeLayout[3][2]=B00110;
+  cubeLayout[3][3]=B00110;
+  
+  ShowDesignV2(cubeLayout, RunTime/steps); 
+  TransformCube(1);
+  ShowDesignV2(cubeLayout, RunTime/steps); 
+  TransformCube(2);
+  ShowDesignV2(cubeLayout, RunTime/steps); 
+  TransformCube(2);
+  ShowDesignV2(cubeLayout, RunTime/steps); 
+  TransformCube(5);
+  ShowDesignV2(cubeLayout, RunTime/steps); 
+  TransformCube(5);
+  ShowDesignV2(cubeLayout, RunTime/steps); 
+  TransformCube(5,1);
+  ShowDesignV2(cubeLayout, RunTime/steps); 
+  TransformCube(5,1);
+  ShowDesignV2(cubeLayout, RunTime/steps); 
+}
 
 void TransformCube(uint8_t transformDirection, uint8_t wrap) {
+  //Wrap 0 does not wrap around and clears any data pushed off
+  //Wrap 1 wraps data around the cube
+  //Wrap 2 does not wrap around, but does not clear out previous data in last dimension
   uint8_t temp[5]; //Create a temp table to hold the data for wrapping before overwriting
   if (transformDirection==1) { //Move the layers up
     if(wrap==1) { //Wrap layer 4 around to Layer 0
@@ -163,23 +193,32 @@ void TransformCube(uint8_t transformDirection, uint8_t wrap) {
       }
     }
     if (wrap==1) for (uint8_t row=0; row<=4; row++) cubeLayout[0][row]=temp[row]; //Use the values in temp to populate Layer 0 which used to be 4
-    if (wrap==2) for (uint8_t row=0; row<=4; row++) cubeLayout[0][row]=0; //Clear out Layer0
+    if (wrap==0) for (uint8_t row=0; row<=4; row++) cubeLayout[0][row]=0; //Clear out Layer0
   }
   
-  if (transformDirection==-1) { //Move the layers down
+  if (transformDirection==2) { //Move the layers down
     if(wrap==1) { //Wrap layer 4 around to Layer 0
       for (uint8_t row=0; row<=4; row++) temp[row]=cubeLayout[0][row]; //Store the values of layer 0 in the temp array
-    } 
-    for (uint8_t layer=0; layer >=3; layer++) {
-    for (uint8_t row=0; row <=4; row++) {
-      cubeLayout[layer][row]=cubeLayout[layer+1][row]; //Copy each row in a layer from the above layer
+    }
+    for (uint8_t layer=0; layer <=3; layer++) {
+      for (uint8_t row=0; row <=4; row++) {
+        cubeLayout[layer][row]=cubeLayout[layer+1][row]; //Copy each row in a layer from the above layer
       }
     }
     if (wrap==1) for (uint8_t row=0; row<=4; row++) cubeLayout[4][row]=temp[row]; //Use the values in temp to populate Layer 4 which used to be 0
-    if (wrap==2) for (uint8_t row=0; row<=4; row++) cubeLayout[4][row]=0; //Clear out Layer4
+    if (wrap==0) for (uint8_t row=0; row<=4; row++) cubeLayout[4][row]=0; //Clear out Layer4
   }
   
-  if (transformDirection==4) { //Move the cube forward
+  if (transformDirection==3) { //Move the cube to the left
+    //Code
+  }
+  
+  if (transformDirection==4) { //Move tthe cube to the right
+    //Code
+  }
+  
+  if (transformDirection==5) { //Move the cube forward
+    //BUG Does not clear data from Row4 by default. What is my expected action?
     if(wrap==1) for (uint8_t layer=0; layer<=4; layer++) temp[layer]=cubeLayout[layer][0]; //Store values of row 0 in the temp array
     for (uint8_t row=0; row<=3; row++) {
       for (uint8_t layer=0; layer<=4; layer++) {
@@ -187,7 +226,7 @@ void TransformCube(uint8_t transformDirection, uint8_t wrap) {
       }
     }
     if (wrap==1) for (uint8_t layer=0; layer<=4; layer++) cubeLayout[layer][4]=temp[layer]; //Use the values in temp to populate row 4 which used to be 0
-    if (wrap==2) for (uint8_t layer=0; layer<=4; layer++) cubeLayout[layer][4]=0; //Clear out Layer4
+    if (wrap==0) for (uint8_t layer=0; layer<=4; layer++) cubeLayout[layer][4]=0; //Clear out Layer4
   }
 }
 
@@ -214,11 +253,16 @@ void DesignDiagonalFillV3 (unsigned long RunTime, uint8_t width) {
   
   for (uint8_t pass=0; pass<=steps; pass++) {
     //Copy layers up, leaving Layer 0 alone
+    TransformCube(1);
+    TransformCube(4);
+    /*
     for (uint8_t layer=4; layer >=1; layer--) {
       for (uint8_t row=0; row <=4; row++) {
         cubeLayout[layer][row]=cubeLayout[layer-1][row];
       }
     }
+    */
+
     //On Layer 0, copy rows up, leaving the bottom row alone
     //LED 0 is on Row 4, so leaving it along to introduce changes
     for (uint8_t row=0; row <=3; row++) {
@@ -226,7 +270,7 @@ void DesignDiagonalFillV3 (unsigned long RunTime, uint8_t width) {
     }
     //For layer 0, row 4, shift the bit to the right by one and then add 16 to fill it back in, eventually filling in the row
     if (pass==0) cubeLayout[0][4]=B10000; //On the first pass, start with LED 0
-    else if (pass<(width)) {
+    else if (pass<width) {
       cubeLayout[0][4]>>=1; //Move the LED to the right
       cubeLayout[0][4]+=16; //Add 16 to fill in the left most bit
     }
@@ -237,7 +281,7 @@ void DesignDiagonalFillV3 (unsigned long RunTime, uint8_t width) {
       cubeLayout[0][4]+=16; //Add 16 to fill in the left most bit
     }
     */
-    else cubeLayout[0][4]>>=1;
+    else cubeLayout[0][4]>>=1; //Only shift LED in layer 0 row 4 over, and do not add LED0 again
     //Serial.println("Showing design");
     ShowDesignV2(cubeLayout, RunTime/steps);
   }
