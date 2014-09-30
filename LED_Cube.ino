@@ -133,7 +133,7 @@ void loop() {
        DesignMoveTest(5000);
        break;
      case 24:
-       DesignMiniCubeDance(30000, 40);
+       DesignMiniCubeDance(30000, 75);
        break;
        
     case 9001: 
@@ -158,6 +158,7 @@ void loop() {
 
 void DesignMiniCubeDance (unsigned long RunTime, int Interval) {
   uint8_t steps = RunTime/Interval;
+  uint8_t previousMove;
   ClearCube();
   //Start with a cube in the middle
   cubeLayout[2][2]=B00110;
@@ -184,12 +185,18 @@ void DesignMiniCubeDance (unsigned long RunTime, int Interval) {
         if (moveDirection==4 && bitRead(cubeLayout[layer][row], 0)!=0) moveDirection=0; //If already on East side, do not move East
       }
     }
+    if ((moveDirection==1 && previousMove==2) || (moveDirection==2 && previousMove==1)) moveDirection=0; //Keep it from jittering back and forth
+    if ((moveDirection==3 && previousMove==4) || (moveDirection==4 && previousMove==3)) moveDirection=0;
+    if ((moveDirection==5 && previousMove==6) || (moveDirection==6 && previousMove==5)) moveDirection=0;
     
     if (moveDirection!=0) { //If direction to move isn't invalid, then move
       TransformCube(moveDirection);
       ShowDesignV2(cubeLayout, RunTime/steps);
+      previousMove=moveDirection; //Keep track of the previous move direction
       pass++;
     }
+    
+
   }
 }
 
