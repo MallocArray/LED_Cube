@@ -31,6 +31,7 @@ void FadeLed(int targetLed, int runTime=1500, int minBrightness=0, int maxBright
 void FadeLayer(int targetLayer, int runTime=1500, int minBrightness=0, int maxBrightness=255);
 void DesignDiagonalFillV3 (unsigned long RunTime=1000, uint8_t width=1); 
 void TransformCube(uint8_t transformDirection, uint8_t wrap=0);
+void DesignMiniCubeDance (unsigned long RunTime=5000, int Interval=250);
 
 
 void setup() {
@@ -41,7 +42,7 @@ void setup() {
     digitalWrite(ledPins[thisPin], LOW);  
   }
   randomSeed(analogRead(0));
-  //Serial.begin(9600);
+  Serial.begin(9600);
   Serial.println("Setup Done");
 }
 
@@ -132,7 +133,7 @@ void loop() {
        DesignMoveTest(5000);
        break;
      case 24:
-       DesignMiniCubeDance(50000);
+       DesignMiniCubeDance(30000, 40);
        break;
        
     case 9001: 
@@ -155,8 +156,8 @@ void loop() {
   }
 }
 
-void DesignMiniCubeDance (unsigned long RunTime) {
-  uint8_t steps = RunTime/250;
+void DesignMiniCubeDance (unsigned long RunTime, int Interval) {
+  uint8_t steps = RunTime/Interval;
   ClearCube();
   //Start with a cube in the middle
   cubeLayout[2][2]=B00110;
@@ -164,9 +165,31 @@ void DesignMiniCubeDance (unsigned long RunTime) {
   cubeLayout[3][2]=B00110;
   cubeLayout[3][3]=B00110;
   ShowDesignV2(cubeLayout, RunTime/steps);
-  for (uint8_t pass=0; pass<=steps; pass++) {
-    TransformCube(random(1, 6), 1);
-    ShowDesignV2(cubeLayout, RunTime/steps);
+  for (uint8_t pass=0; pass<=steps;) {    
+    uint8_t moveDirection=random(1,7); //Random direction to move the cube
+
+    for (uint8_t layer=0; layer<=4; layer++) { //Checking to see if already on the north or south side
+        if (moveDirection==5 && cubeLayout[layer][0]!=0) moveDirection=0; //If against North side, do not move North
+        if (moveDirection==6 && cubeLayout[layer][4]!=0) moveDirection=0; //If against South side, do not move South
+      }
+      
+    for (uint8_t row=0; row<=4; row++) { //Checking to see if already on Top or Bottom side
+      if (moveDirection==1 && cubeLayout[4][row]!=0) moveDirection=0; //If already on top side, do not move up
+      if (moveDirection==2 && cubeLayout[0][row]!=0) moveDirection=0; //If already on bottom side, do not down up
+      }
+      
+    for (uint8_t layer=0; layer<=4; layer++) { //Checking to see if already on east or west side
+      for (uint8_t row=0; row<=4; row++) {
+        if (moveDirection==3 && bitRead(cubeLayout[layer][row], 4)!=0) moveDirection=0; //If already on West side, do not move West
+        if (moveDirection==4 && bitRead(cubeLayout[layer][row], 0)!=0) moveDirection=0; //If already on East side, do not move East
+      }
+    }
+    
+    if (moveDirection!=0) { //If direction to move isn't invalid, then move
+      TransformCube(moveDirection);
+      ShowDesignV2(cubeLayout, RunTime/steps);
+      pass++;
+    }
   }
 }
 
@@ -259,7 +282,7 @@ void TransformCube(uint8_t transformDirection, uint8_t wrap) {
       }
     }
     
-    if(transformDirection == 4) { //Move the dube to the right
+    if(transformDirection == 4) { //Move the cube to the right
     //Need to figure out how to leave the right most bit alone for wrap mode 2
       for(int layer=0; layer<=4; ++layer) {
         for(int row=0; row<=4; ++row) {
