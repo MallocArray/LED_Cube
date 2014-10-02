@@ -48,13 +48,11 @@ void setup() {
 
 
 
-
-
 void loop() {
   //Main loop for various patterns
   int pattern = random(18);
   //Remark out the line below to run random patterns, or set the value to the pattern you want to display
-  pattern=24;
+  pattern=20;
   Serial.println(freeRam()); 
   switch(pattern) {
     case 0: 
@@ -97,7 +95,10 @@ void loop() {
        LightFullCube(3000);
        break;
      case 13:
-       //To be used
+       FullReset();
+       delay(100);
+       DesignExplode(250);
+       delay(500);
        break;
      case 14:
        DesignPerim(5000);
@@ -109,22 +110,19 @@ void loop() {
        DesignFirework(2000);
        break;
      case 17:
-       FullReset();
-       delay(100);
-       DesignExplode(250);
-       delay(500);
-       break;
-     case 18:
-       //To be used
-       break;
-     case 19:
-       //To be used
-       break;
-     case 20:
        DesignCheckerboardV2(3000);
        break;
-     case 21:
+     case 18:
        DesignDiagonalFillV3(1000, random(1, 14));
+       break;
+     case 19:
+       DesignMiniCubeDance(30000, 75);
+       break;
+     case 20:
+       DesignWord("ABIGAIL", 5000);
+       break;
+     case 21:
+
        break;
      case 22:
        //To be used
@@ -133,7 +131,7 @@ void loop() {
        DesignMoveTest(5000);
        break;
      case 24:
-       DesignMiniCubeDance(30000, 75);
+
        break;
        
     case 9001: 
@@ -155,6 +153,81 @@ void loop() {
       break;
   }
 }
+
+
+void DesignWord (char displayWord[], int RunTime) {
+  ClearCube(); //Clear the cube before starting
+  uint8_t letterCount = sizeof(displayWord); //Count the number of letters in the array
+  Serial.println(letterCount);
+  for (uint8_t pass=0; pass<=letterCount; pass++) {  
+    DesignLetter(displayWord[pass]);  //Set the front of the cube to the
+    for (uint8_t slide=0; slide <=4; slide++) {
+      if (slide==0) ShowDesignV2(cubeLayout, RunTime/letterCount/2); //Leave the front up for longer
+      else ShowDesignV2(cubeLayout, RunTime/letterCount/50); //When sliding back, do it much quicker
+      TransformCube(5); //Slide design to the back 
+    }
+  }
+}
+
+
+
+void DesignLetter (char letter) {
+  //Accept a single letter and display on front of cube. Could do additional work to place other locations
+  //Font: http://www.dafont.com/5x5-pixel.font
+  //Alternative: http://www.dafont.com/pixelzim3x5.font
+  //http://fontstruct.com/fontstructions/show/pixel_roughly_5x4
+  switch(letter) {
+    case 'A':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B10001;
+      cubeLayout[2][4]=B11111;
+      cubeLayout[1][4]=B10001;
+      cubeLayout[0][4]=B10001;
+      break;
+    case 'B':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B10001;
+      cubeLayout[2][4]=B11111;
+      cubeLayout[1][4]=B10001;
+      cubeLayout[0][4]=B11110;
+      break;
+    case 'C':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B10000;
+      cubeLayout[2][4]=B10000;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B11111;
+    case 'D':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B10001;
+      cubeLayout[2][4]=B10001;
+      cubeLayout[1][4]=B10001;
+      cubeLayout[0][4]=B11110;
+      break;
+    case 'G':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B10000;
+      cubeLayout[2][4]=B10111;
+      cubeLayout[1][4]=B10001;
+      cubeLayout[0][4]=B11111;
+      break;
+    case 'I':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B00100;
+      cubeLayout[2][4]=B00100;
+      cubeLayout[1][4]=B00100;
+      cubeLayout[0][4]=B11111;
+      break;
+    case 'L':
+      cubeLayout[4][4]=B10000;
+      cubeLayout[3][4]=B10000;
+      cubeLayout[2][4]=B10000;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B11111;
+      break;
+  }  
+}
+
 
 void DesignMiniCubeDance (unsigned long RunTime, int Interval) {
   uint8_t steps = RunTime/Interval;
