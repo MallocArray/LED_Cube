@@ -52,7 +52,7 @@ void loop() {
   //Main loop for various patterns
   int pattern = random(18);
   //Remark out the line below to run random patterns, or set the value to the pattern you want to display
-  pattern=20;
+  pattern=21;
   Serial.println(freeRam()); 
   switch(pattern) {
     case 0: 
@@ -116,19 +116,19 @@ void loop() {
        DesignDiagonalFillV3(1000, random(1, 14));
        break;
      case 19:
-       DesignMiniCubeDance(30000, 75);
+       DesignMiniCubeDance(15000, 75);
        break;
      case 20:
-       DesignWord("ABIGAIL", 5000);
+       DesignWord("PAVILION SERVICES", 750);
        break;
      case 21:
-
+       DesignSwipes(5000);
        break;
      case 22:
        //To be used
        break;
      case 23:
-       DesignMoveTest(5000);
+       DesignMoveTest(3000);
        break;
      case 24:
 
@@ -154,16 +154,107 @@ void loop() {
   }
 }
 
+void DesignSwipes(int RunTime) {
+  //Does a single plane swipe back and forth using shifts
+  uint8_t steps=45;
+  
+  //Shift plane up and down 
+  ClearCube();
+  for(uint8_t x=0; x<=4; x++) cubeLayout[0][x]=B11111;
+  ShowDesignV2(cubeLayout, RunTime/steps); //Show initial plane
+  for(uint8_t x=0; x<=3; x++) {
+    //Shift plane up
+    TransformCube(1);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+  for(int x=3; x>=0; x--) {
+    //Shift plane down
+    TransformCube(2);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+  
+  //Shift plane forward and backward
+  ClearCube();
+  for(uint8_t x=0; x<=4; x++) cubeLayout[x][4]=B11111;
+  ShowDesignV2(cubeLayout, RunTime/steps); //Show initial plane
+  for(uint8_t x=0; x<=3; x++) {
+    //Shift forward
+    TransformCube(5);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+  for(int x=3; x>=0; x--) {
+    //Shift backward
+    TransformCube(6);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+  
+  //Shift plane right and left
+  ClearCube();
+  for(uint8_t x=0; x<=4; x++) 
+    for (uint8_t y=0; y<=4; y++) cubeLayout[x][y]=B10000;
+  ShowDesignV2(cubeLayout, RunTime/steps); //Show initial plane
+  for(uint8_t x=0; x<=3; x++) {
+    //Shift right
+    TransformCube(4);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+  for(int x=3; x>=0; x--) {
+    //Shift left
+    TransformCube(3);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+  
+  //Shift plane down and up
+  ClearCube();
+  for(uint8_t x=0; x<=4; x++) cubeLayout[4][x]=B11111;
+  ShowDesignV2(cubeLayout, RunTime/steps); //Show initial plane
+  for(int x=3; x>=0; x--) {
+    TransformCube(2);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+  for(uint8_t x=0; x<=3; x++) {
+    TransformCube(1);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+  
+  //Shift plane backward and forward
+  ClearCube();
+  for(uint8_t x=0; x<=4; x++) cubeLayout[x][0]=B11111;
+  ShowDesignV2(cubeLayout, RunTime/steps); //Show initial plane
+  for(int x=3; x>=0; x--) {
+    TransformCube(6);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+  for(uint8_t x=0; x<=3; x++) {
+    TransformCube(5);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
 
-void DesignWord (char displayWord[], int RunTime) {
+  //Shift plane left and right
+  ClearCube();
+  for(uint8_t x=0; x<=4; x++) 
+    for (uint8_t y=0; y<=4; y++) cubeLayout[x][y]=B00001;
+  ShowDesignV2(cubeLayout, RunTime/steps); //Show initial plane
+  for(int x=3; x>=0; x--) {
+    TransformCube(3);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+  for(uint8_t x=0; x<=3; x++) {
+    TransformCube(4);
+    ShowDesignV2(cubeLayout, RunTime/steps);
+  }
+}
+  
+  
+  
+void DesignWord (char displayWord[], int LetterTime) {
   ClearCube(); //Clear the cube before starting
-  uint8_t letterCount = sizeof(displayWord); //Count the number of letters in the array
-  Serial.println(letterCount);
+  uint8_t letterCount = strlen(displayWord); //Count the number of letters in the array
   for (uint8_t pass=0; pass<=letterCount; pass++) {  
     DesignLetter(displayWord[pass]);  //Set the front of the cube to the
     for (uint8_t slide=0; slide <=4; slide++) {
-      if (slide==0) ShowDesignV2(cubeLayout, RunTime/letterCount/2); //Leave the front up for longer
-      else ShowDesignV2(cubeLayout, RunTime/letterCount/50); //When sliding back, do it much quicker
+      if (slide==0) ShowDesignV2(cubeLayout, LetterTime/4*3); //Leave the front up for longer (3/4 of the time)
+      else ShowDesignV2(cubeLayout, LetterTime/4/4); //When sliding back, do it much quicker (1/4 of the remaining 1/4 of the time)
       TransformCube(5); //Slide design to the back 
     }
   }
@@ -197,12 +288,27 @@ void DesignLetter (char letter) {
       cubeLayout[2][4]=B10000;
       cubeLayout[1][4]=B10000;
       cubeLayout[0][4]=B11111;
+      break;
     case 'D':
       cubeLayout[4][4]=B11110;
       cubeLayout[3][4]=B10001;
       cubeLayout[2][4]=B10001;
       cubeLayout[1][4]=B10001;
       cubeLayout[0][4]=B11110;
+      break;
+    case 'E':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B10000;
+      cubeLayout[2][4]=B11111;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B11111;
+      break;
+    case 'F':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B10000;
+      cubeLayout[2][4]=B11110;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B10000;
       break;
     case 'G':
       cubeLayout[4][4]=B11111;
@@ -211,6 +317,13 @@ void DesignLetter (char letter) {
       cubeLayout[1][4]=B10001;
       cubeLayout[0][4]=B11111;
       break;
+    case 'H':
+      cubeLayout[4][4]=B10001;
+      cubeLayout[3][4]=B10001;
+      cubeLayout[2][4]=B11111;
+      cubeLayout[1][4]=B10001;
+      cubeLayout[0][4]=B10001;
+      break;
     case 'I':
       cubeLayout[4][4]=B11111;
       cubeLayout[3][4]=B00100;
@@ -218,12 +331,197 @@ void DesignLetter (char letter) {
       cubeLayout[1][4]=B00100;
       cubeLayout[0][4]=B11111;
       break;
+    case 'J':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B00010;
+      cubeLayout[2][4]=B00010;
+      cubeLayout[1][4]=B10010;
+      cubeLayout[0][4]=B11110;
+      break;
+    case 'K':
+      cubeLayout[4][4]=B10010;
+      cubeLayout[3][4]=B10100;
+      cubeLayout[2][4]=B11000;
+      cubeLayout[1][4]=B10100;
+      cubeLayout[0][4]=B10010;
+      break;
     case 'L':
       cubeLayout[4][4]=B10000;
       cubeLayout[3][4]=B10000;
       cubeLayout[2][4]=B10000;
       cubeLayout[1][4]=B10000;
       cubeLayout[0][4]=B11111;
+      break;
+    case 'M':
+      cubeLayout[4][4]=B10001;
+      cubeLayout[3][4]=B11011;
+      cubeLayout[2][4]=B10101;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B10001;
+      break;
+    case 'N':
+      cubeLayout[4][4]=B10001;
+      cubeLayout[3][4]=B11001;
+      cubeLayout[2][4]=B10101;
+      cubeLayout[1][4]=B10011;
+      cubeLayout[0][4]=B10001;
+      break;
+    case 'O':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B10001;
+      cubeLayout[2][4]=B10001;
+      cubeLayout[1][4]=B10001;
+      cubeLayout[0][4]=B11111;
+      break;
+    case 'P':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B10001;
+      cubeLayout[2][4]=B11111;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B10000;
+      break;
+    case 'Q':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B10001;
+      cubeLayout[2][4]=B10001;
+      cubeLayout[1][4]=B10011;
+      cubeLayout[0][4]=B11111;
+      break;
+    case 'R':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B10001;
+      cubeLayout[2][4]=B11111;
+      cubeLayout[1][4]=B10010;
+      cubeLayout[0][4]=B10001;
+      break;
+    case 'S':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B10000;
+      cubeLayout[2][4]=B11111;
+      cubeLayout[1][4]=B00001;
+      cubeLayout[0][4]=B11111;
+      break;
+    case 'T':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B00100;
+      cubeLayout[2][4]=B00100;
+      cubeLayout[1][4]=B00100;
+      cubeLayout[0][4]=B00100;
+      break;
+    case 'U':
+      cubeLayout[4][4]=B10001;
+      cubeLayout[3][4]=B10001;
+      cubeLayout[2][4]=B10001;
+      cubeLayout[1][4]=B10001;
+      cubeLayout[0][4]=B11111;
+      break;
+    case 'V':
+      cubeLayout[4][4]=B10001;
+      cubeLayout[3][4]=B10001;
+      cubeLayout[2][4]=B01010;
+      cubeLayout[1][4]=B01010;
+      cubeLayout[0][4]=B00100;
+      break;
+    case 'W':
+      cubeLayout[4][4]=B10001;
+      cubeLayout[3][4]=B10001;
+      cubeLayout[2][4]=B10001;
+      cubeLayout[1][4]=B10101;
+      cubeLayout[0][4]=B11011;
+      break;
+    case 'X':
+      cubeLayout[4][4]=B10001;
+      cubeLayout[3][4]=B01010;
+      cubeLayout[2][4]=B00100;
+      cubeLayout[1][4]=B01010;
+      cubeLayout[0][4]=B10001;
+      break;
+    case 'Y':
+      cubeLayout[4][4]=B10001;
+      cubeLayout[3][4]=B01010;
+      cubeLayout[2][4]=B00100;
+      cubeLayout[1][4]=B00100;
+      cubeLayout[0][4]=B00100;
+      break;
+    case 'Z':
+      cubeLayout[4][4]=B11111;
+      cubeLayout[3][4]=B00010;
+      cubeLayout[2][4]=B00100;
+      cubeLayout[1][4]=B01000;
+      cubeLayout[0][4]=B11111;
+      break;
+    case ' ':
+      ClearCube();
+      break;
+    case '0':
+      cubeLayout[4][4]=B00110;
+      cubeLayout[3][4]=B01001;
+      cubeLayout[2][4]=B01001;
+      cubeLayout[1][4]=B01001;
+      cubeLayout[0][4]=B00110;
+      break;
+    case '1':
+      cubeLayout[4][4]=B00110;
+      cubeLayout[3][4]=B00010;
+      cubeLayout[2][4]=B00010;
+      cubeLayout[1][4]=B00010;
+      cubeLayout[0][4]=B00010;
+      break; 
+    case '2':
+      cubeLayout[4][4]=B00110;
+      cubeLayout[3][4]=B01001;
+      cubeLayout[2][4]=B00010;
+      cubeLayout[1][4]=B00100;
+      cubeLayout[0][4]=B01111;
+      break;
+    case '3':
+      cubeLayout[4][4]=B01111;
+      cubeLayout[3][4]=B00001;
+      cubeLayout[2][4]=B00111;
+      cubeLayout[1][4]=B00001;
+      cubeLayout[0][4]=B01111;
+      break;
+    case '4':
+      cubeLayout[4][4]=B01001;
+      cubeLayout[3][4]=B01001;
+      cubeLayout[2][4]=B01111;
+      cubeLayout[1][4]=B00001;
+      cubeLayout[0][4]=B00001;
+      break;
+    case '5':
+      cubeLayout[4][4]=B00111;
+      cubeLayout[3][4]=B01000;
+      cubeLayout[2][4]=B01111;
+      cubeLayout[1][4]=B00001;
+      cubeLayout[0][4]=B01111;
+      break;
+    case '6':
+      cubeLayout[4][4]=B01111;
+      cubeLayout[3][4]=B01000;
+      cubeLayout[2][4]=B01111;
+      cubeLayout[1][4]=B01001;
+      cubeLayout[0][4]=B01111;
+      break;
+    case '7':
+      cubeLayout[4][4]=B01111;
+      cubeLayout[3][4]=B00001;
+      cubeLayout[2][4]=B00010;
+      cubeLayout[1][4]=B00100;
+      cubeLayout[0][4]=B01000;
+      break;
+    case '8':
+      cubeLayout[4][4]=B01111;
+      cubeLayout[3][4]=B01001;
+      cubeLayout[2][4]=B00110;
+      cubeLayout[1][4]=B01001;
+      cubeLayout[0][4]=B01111;
+      break;
+    case '9':
+      cubeLayout[4][4]=B01111;
+      cubeLayout[3][4]=B01001;
+      cubeLayout[2][4]=B01111;
+      cubeLayout[1][4]=B00001;
+      cubeLayout[0][4]=B01111;
       break;
   }  
 }
