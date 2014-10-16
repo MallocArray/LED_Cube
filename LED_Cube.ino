@@ -41,7 +41,7 @@ void setup() {
     pinMode(ledPins[thisPin], OUTPUT);   
     digitalWrite(ledPins[thisPin], LOW);  
   }
-  randomSeed(analogRead(0));
+  randomSeed(analogRead(1));
   Serial.begin(9600);
   Serial.println("Setup Done");
 }
@@ -50,9 +50,9 @@ void setup() {
 
 void loop() {
   //Main loop for various patterns
-  int pattern = random(18);
+  int pattern = random(23);
   //Remark out the line below to run random patterns, or set the value to the pattern you want to display
-  pattern=21;
+  pattern=20;
   Serial.println(freeRam()); 
   switch(pattern) {
     case 0: 
@@ -113,19 +113,19 @@ void loop() {
        DesignCheckerboardV2(3000);
        break;
      case 18:
-       DesignDiagonalFillV3(1000, random(1, 14));
+       for (int x=0; x<=5; x++) DesignDiagonalFillV3(1000, random(1, 14));
        break;
      case 19:
-       DesignMiniCubeDance(15000, 75);
+       DesignMiniCubeDance(7000, 75);
        break;
      case 20:
-       DesignWord("PAVILION SERVICES", 750);
+       DesignWord("LED CUBE 5x5", 750);
        break;
      case 21:
        DesignSwipes(5000);
        break;
      case 22:
-       //To be used
+       DesignPyramidCrash(3000);
        break;
      case 23:
        DesignMoveTest(3000);
@@ -133,25 +133,27 @@ void loop() {
      case 24:
 
        break;
-       
-    case 9001: 
-      LayerWalk(25);
-      WalkLayerUpDown(25);
-      WalkLayerUpDownReverse(25);
-      WalkSpiral(50);
-      for (int x=0; x <= 30; x++) RandomLed(150); //30 random LEDs
-      for (int x=0; x <= 2; x++) { 
-        ColumnUpDown(random(25), 150); //Random up and down the column
-        ColumnUp(random(25), 150); //Random up the column
-        ColumnDown(random(100, 125), 150); //Random down the column
-      }
-      for (int x=0; x<15; x++) LayerWalk(1);
-      CrawlFullCube(1000);
-      FillFullCube(2000);
-      for (int x=0; x<=15; x++) FadeLed(random(125));
-      LightFullCube(5000);
-      break;
   }
+}
+
+void DesignPyramidCrash (int RunTime) {
+  //Shows a design of a inverse pyramid and then lower it down
+  ClearCube();
+  for (uint8_t x=0; x<=4; x++) {
+    cubeLayout[4][x]=B11111;
+    cubeLayout[0][x]=B11111;
+  }
+  for (uint8_t x=1; x<=3; x++) {
+    cubeLayout[3][x]=B01110;
+    cubeLayout[1][x]=B01110;
+  }
+  cubeLayout[2][2]=B00100;
+  ShowDesignV2(cubeLayout, RunTime/6*5);
+  for (uint8_t x=0; x<=5; x++) {
+    TransformCube(2);
+    ShowDesignV2(cubeLayout, RunTime/6);
+  }
+  
 }
 
 void DesignSwipes(int RunTime) {
@@ -261,8 +263,278 @@ void DesignWord (char displayWord[], int LetterTime) {
 }
 
 
-
 void DesignLetter (char letter) {
+  //Accept a single letter and display on front of cube. Could do additional work to place other locations
+  //Font: http://fontstruct.com/fontstructions/show/pixel_roughly_5x4
+  switch(letter) {
+    case 'A':
+      cubeLayout[4][4]=B01100;
+      cubeLayout[3][4]=B10010;
+      cubeLayout[2][4]=B11110;
+      cubeLayout[1][4]=B10010;
+      cubeLayout[0][4]=B10010;
+      break;
+    case 'B':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B10010;
+      cubeLayout[2][4]=B11100;
+      cubeLayout[1][4]=B10010;
+      cubeLayout[0][4]=B11110;
+      break;
+    case 'C':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B10000;
+      cubeLayout[2][4]=B10000;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B11110;
+      break;
+    case 'D':
+      cubeLayout[4][4]=B11100;
+      cubeLayout[3][4]=B10010;
+      cubeLayout[2][4]=B10010;
+      cubeLayout[1][4]=B10010;
+      cubeLayout[0][4]=B11100;
+      break;
+    case 'E':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B10000;
+      cubeLayout[2][4]=B11110;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B11110;
+      break;
+    case 'F':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B10000;
+      cubeLayout[2][4]=B11100;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B10000;
+      break;
+    case 'G':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B10000;
+      cubeLayout[2][4]=B10110;
+      cubeLayout[1][4]=B10010;
+      cubeLayout[0][4]=B11110;
+      break;
+    case 'H':
+      cubeLayout[4][4]=B10010;
+      cubeLayout[3][4]=B10010;
+      cubeLayout[2][4]=B11110;
+      cubeLayout[1][4]=B10010;
+      cubeLayout[0][4]=B10010;
+      break;
+    case 'I':
+      cubeLayout[4][4]=B11100;
+      cubeLayout[3][4]=B01000;
+      cubeLayout[2][4]=B01000;
+      cubeLayout[1][4]=B01000;
+      cubeLayout[0][4]=B11100;
+      break;
+    case 'J':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B00100;
+      cubeLayout[2][4]=B00100;
+      cubeLayout[1][4]=B10100;
+      cubeLayout[0][4]=B11100;
+      break;
+    case 'K':
+      cubeLayout[4][4]=B10010;
+      cubeLayout[3][4]=B10100;
+      cubeLayout[2][4]=B11000;
+      cubeLayout[1][4]=B10100;
+      cubeLayout[0][4]=B10010;
+      break;
+    case 'L':
+      cubeLayout[4][4]=B10000;
+      cubeLayout[3][4]=B10000;
+      cubeLayout[2][4]=B10000;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B11110;
+      break;
+    case 'M': //Alternate font 5x5 for readability
+      cubeLayout[4][4]=B10001;
+      cubeLayout[3][4]=B11011;
+      cubeLayout[2][4]=B10101;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B10001;
+      break;
+    case 'N':
+      cubeLayout[4][4]=B10010;
+      cubeLayout[3][4]=B11010;
+      cubeLayout[2][4]=B10110;
+      cubeLayout[1][4]=B10010;
+      cubeLayout[0][4]=B10010;
+      break;
+    case 'O':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B10010;
+      cubeLayout[2][4]=B10010;
+      cubeLayout[1][4]=B10010;
+      cubeLayout[0][4]=B11110;
+      break;
+    case 'P':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B10010;
+      cubeLayout[2][4]=B11110;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B10000;
+      break;
+    case 'Q':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B10010;
+      cubeLayout[2][4]=B10010;
+      cubeLayout[1][4]=B10110;
+      cubeLayout[0][4]=B11111;
+      break;
+    case 'R':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B10010;
+      cubeLayout[2][4]=B11110;
+      cubeLayout[1][4]=B10100;
+      cubeLayout[0][4]=B10010;
+      break;
+    case 'S':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B10000;
+      cubeLayout[2][4]=B11110;
+      cubeLayout[1][4]=B00010;
+      cubeLayout[0][4]=B11110;
+      break;
+    case 'T':
+      cubeLayout[4][4]=B11100;
+      cubeLayout[3][4]=B01000;
+      cubeLayout[2][4]=B01000;
+      cubeLayout[1][4]=B01000;
+      cubeLayout[0][4]=B01000;
+      break;
+    case 'U':
+      cubeLayout[4][4]=B10010;
+      cubeLayout[3][4]=B10010;
+      cubeLayout[2][4]=B10010;
+      cubeLayout[1][4]=B10010;
+      cubeLayout[0][4]=B11110;
+      break;
+    case 'V':
+      cubeLayout[4][4]=B10010;
+      cubeLayout[3][4]=B10010;
+      cubeLayout[2][4]=B10010;
+      cubeLayout[1][4]=B10010;
+      cubeLayout[0][4]=B01100;
+      break;
+    case 'W': //Alternate font 5x5 for readability
+      cubeLayout[4][4]=B10001;
+      cubeLayout[3][4]=B10001;
+      cubeLayout[2][4]=B10001;
+      cubeLayout[1][4]=B10101;
+      cubeLayout[0][4]=B11011;
+      break;
+    case 'X':
+      cubeLayout[4][4]=B10010;
+      cubeLayout[3][4]=B10010;
+      cubeLayout[2][4]=B01100;
+      cubeLayout[1][4]=B10010;
+      cubeLayout[0][4]=B10010;
+      break;
+    case 'Y':
+      cubeLayout[4][4]=B10100;
+      cubeLayout[3][4]=B10100;
+      cubeLayout[2][4]=B01000;
+      cubeLayout[1][4]=B01000;
+      cubeLayout[0][4]=B01000;
+      break;
+    case 'Z':
+      cubeLayout[4][4]=B11110;
+      cubeLayout[3][4]=B00100;
+      cubeLayout[2][4]=B01000;
+      cubeLayout[1][4]=B10000;
+      cubeLayout[0][4]=B11110;
+      break;
+    case ' ':
+      ClearCube();
+      break;
+    case '0':
+      cubeLayout[4][4]=B00110;
+      cubeLayout[3][4]=B01001;
+      cubeLayout[2][4]=B01001;
+      cubeLayout[1][4]=B01001;
+      cubeLayout[0][4]=B00110;
+      break;
+    case '1':
+      cubeLayout[4][4]=B00110;
+      cubeLayout[3][4]=B00010;
+      cubeLayout[2][4]=B00010;
+      cubeLayout[1][4]=B00010;
+      cubeLayout[0][4]=B00010;
+      break; 
+    case '2':
+      cubeLayout[4][4]=B00110;
+      cubeLayout[3][4]=B01001;
+      cubeLayout[2][4]=B00010;
+      cubeLayout[1][4]=B00100;
+      cubeLayout[0][4]=B01111;
+      break;
+    case '3':
+      cubeLayout[4][4]=B01111;
+      cubeLayout[3][4]=B00001;
+      cubeLayout[2][4]=B00111;
+      cubeLayout[1][4]=B00001;
+      cubeLayout[0][4]=B01111;
+      break;
+    case '4':
+      cubeLayout[4][4]=B01001;
+      cubeLayout[3][4]=B01001;
+      cubeLayout[2][4]=B01111;
+      cubeLayout[1][4]=B00001;
+      cubeLayout[0][4]=B00001;
+      break;
+    case '5':
+      cubeLayout[4][4]=B00111;
+      cubeLayout[3][4]=B01000;
+      cubeLayout[2][4]=B01111;
+      cubeLayout[1][4]=B00001;
+      cubeLayout[0][4]=B01111;
+      break;
+    case '6':
+      cubeLayout[4][4]=B01111;
+      cubeLayout[3][4]=B01000;
+      cubeLayout[2][4]=B01111;
+      cubeLayout[1][4]=B01001;
+      cubeLayout[0][4]=B01111;
+      break;
+    case '7':
+      cubeLayout[4][4]=B01111;
+      cubeLayout[3][4]=B00001;
+      cubeLayout[2][4]=B00010;
+      cubeLayout[1][4]=B00100;
+      cubeLayout[0][4]=B01000;
+      break;
+    case '8':
+      cubeLayout[4][4]=B01111;
+      cubeLayout[3][4]=B01001;
+      cubeLayout[2][4]=B00110;
+      cubeLayout[1][4]=B01001;
+      cubeLayout[0][4]=B01111;
+      break;
+    case '9':
+      cubeLayout[4][4]=B01111;
+      cubeLayout[3][4]=B01001;
+      cubeLayout[2][4]=B01111;
+      cubeLayout[1][4]=B00001;
+      cubeLayout[0][4]=B01111;
+      break;
+    case 'x':
+      cubeLayout[4][4]=B00000;
+      cubeLayout[3][4]=B00000;
+      cubeLayout[2][4]=B00101;
+      cubeLayout[1][4]=B00010;
+      cubeLayout[0][4]=B00101;
+  }  
+}
+
+
+
+
+void DesignLetterV1 (char letter) {
   //Accept a single letter and display on front of cube. Could do additional work to place other locations
   //Font: http://www.dafont.com/5x5-pixel.font
   //Alternative: http://www.dafont.com/pixelzim3x5.font
