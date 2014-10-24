@@ -92,7 +92,7 @@ void loop() {
        for (int x=0; x<20; x++) LayerWalk(1);
        break;
      case 12:
-       LightFullCube(3000);
+       //LightFullCube(3000);
        break;
      case 13:
        FullReset();
