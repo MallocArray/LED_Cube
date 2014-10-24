@@ -1,3 +1,46 @@
+/*
+    Copyright (C) 2014 Joshua Post <JoshPost@Outlook.com>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/*
+    To view the cube in action, see: http://youtu.be/jxmDTSmfu2w
+    
+    Hardware Notes
+    LED Cube 5x5x5 as designed by KipKay and sold through KipKayKits.com
+    http://www.kipkaykits.com
+    http://www.instructables.com/id/5x5-LED-Cube-Arduino-Uno/?ALLSTEPS
+    
+    Each layer consists of 5x5 LED with common Annode and copper wire for added structural integrity
+    Utilizes 3 M74HC238 line decoder chips to use 4 Arduino pins to control up to 8 outputs for the columns, connected to PNP Transistors to ground each column
+    These decoders can only have 1 output per decoder at a time, so additional work needs to be done to appear to have multiple LEDs per decoder on
+    Utilizing Persistence of Vision we can cycle through the decoder outputs so quickly that it appears multiple LEDs are on, when actually, each one in on very briefly before turning off and going to the next
+    http://en.wikipedia.org/wiki/Persistence_of_vision
+    
+    Utilizing a Shift Register instead of line decoders could allow you to set multiple outputs to be enabled at the same time, but would require some additional programming
+    https://www.sparkfun.com/products/733
+    
+    When wiring the layers, the lowest layer is Layer 0 up to Layer 4 being the top layer
+    When wiring the columns, while viewing the cube from above, the lower left corner is Column 0, the column to the right of this is Column 1, etc. The second row starts with Column 5 on the left etc
+    This decision was made to match a standard X, Y coordinate system with 0 being in lower left.
+    After changing style to use a 2D array for managing LED status for complex designs and using 5 binary digits for each row, future projects would start with Column 0 being in the lower right corner, Column 1 being to the left
+    This would more closely match the binary digits locations, avoiding the need to reverse the order when using ShowDesignV2
+    
+    If wired differently, some pattterns may work, but the overall layout would not match and adjustments would be needed, particularly in ShowDesignV2
+*/
+    
 int ledPins[] = {2, 3, 4, 8, 12, 13, A1, A2, A3, A5, 5, 6, 9, 10, 11, 7, A0, A4 }; // an array of pin numbers to which LEDs are attached
 int pinCount = 18; //Total number of pins to setup
 
@@ -21,7 +64,7 @@ const int Layer[5] = {5,6,9,10,11};
 const int layersTotal = 5; //Total number of layers in cube
 const int columnsTotal = 25; //Total number of columns in a layer 5x5
 
-int cubeLayout[5][5]; //A variable for keeping track of what LEDs to light up when working with patterns and designs.  
+int cubeLayout[5][5]; //A variable for keeping track of what LEDs to light up when working with patterns and designs.  See ShowDesignV2 function
 
 //Function Prototypes to allow for default argument values
 //Must be above the Setup line? http://forum.arduino.cc/index.php/topic,40799.0.html
@@ -52,7 +95,7 @@ void loop() {
   //Main loop for various patterns
   int pattern = random(23);
   //Remark out the line below to run random patterns, or set the value to the pattern you want to display
-  pattern=20;
+  //pattern=20;
   Serial.println(freeRam()); 
   switch(pattern) {
     case 0: 
@@ -92,6 +135,7 @@ void loop() {
        for (int x=0; x<20; x++) LayerWalk(1);
        break;
      case 12:
+       //Removed due to sometimes crashing Arduino
        //LightFullCube(3000);
        break;
      case 13:
@@ -119,19 +163,13 @@ void loop() {
        DesignMiniCubeDance(7000, 75);
        break;
      case 20:
-       DesignWord("LED CUBE 5x5", 750);
+       DesignWord("KIPKAYKITS", 750);
        break;
      case 21:
        DesignSwipes(5000);
        break;
      case 22:
        DesignPyramidCrash(3000);
-       break;
-     case 23:
-       DesignMoveTest(3000);
-       break;
-     case 24:
-
        break;
   }
 }
@@ -157,7 +195,7 @@ void DesignPyramidCrash (int RunTime) {
 }
 
 void DesignSwipes(int RunTime) {
-  //Does a single plane swipe back and forth using shifts
+  //Does a single plane swipe back and forth using TransformCube function going in each direction
   uint8_t steps=45;
   
   //Shift plane up and down 
@@ -265,6 +303,7 @@ void DesignWord (char displayWord[], int LetterTime) {
 
 void DesignLetter (char letter) {
   //Accept a single letter and display on front of cube. Could do additional work to place other locations
+  //Can use TransformCube to shift it around
   //Font: http://fontstruct.com/fontstructions/show/pixel_roughly_5x4
   switch(letter) {
     case 'A':
@@ -535,10 +574,9 @@ void DesignLetter (char letter) {
 
 
 void DesignLetterV1 (char letter) {
-  //Accept a single letter and display on front of cube. Could do additional work to place other locations
+  //Accept a single letter and display on front of cube.
   //Font: http://www.dafont.com/5x5-pixel.font
-  //Alternative: http://www.dafont.com/pixelzim3x5.font
-  //http://fontstruct.com/fontstructions/show/pixel_roughly_5x4
+  //Can use TransformCube to shift it around
   switch(letter) {
     case 'A':
       cubeLayout[4][4]=B11111;
@@ -800,6 +838,7 @@ void DesignLetterV1 (char letter) {
 
 
 void DesignMiniCubeDance (unsigned long RunTime, int Interval) {
+  //Creates a 2x2 cube in the middle of the cube and then randomly shifts it around, checking to see if against any edge and not moving off that edge
   uint8_t steps = RunTime/Interval;
   uint8_t previousMove;
   ClearCube();
@@ -828,11 +867,11 @@ void DesignMiniCubeDance (unsigned long RunTime, int Interval) {
         if (moveDirection==4 && bitRead(cubeLayout[layer][row], 0)!=0) moveDirection=0; //If already on East side, do not move East
       }
     }
-    if ((moveDirection==1 && previousMove==2) || (moveDirection==2 && previousMove==1)) moveDirection=0; //Keep it from jittering back and forth
+    if ((moveDirection==1 && previousMove==2) || (moveDirection==2 && previousMove==1)) moveDirection=0; //Keep it from jittering back and forth by not doing the exact opposite it did before
     if ((moveDirection==3 && previousMove==4) || (moveDirection==4 && previousMove==3)) moveDirection=0;
     if ((moveDirection==5 && previousMove==6) || (moveDirection==6 && previousMove==5)) moveDirection=0;
     
-    if (moveDirection!=0) { //If direction to move isn't invalid, then move
+    if (moveDirection!=0) { //If direction to move is valid, then move
       TransformCube(moveDirection);
       ShowDesignV2(cubeLayout, RunTime/steps);
       previousMove=moveDirection; //Keep track of the previous move direction
@@ -844,50 +883,8 @@ void DesignMiniCubeDance (unsigned long RunTime, int Interval) {
 }
 
 
-void DesignMoveTest (unsigned long RunTime) {
-  uint8_t steps=16;
-  ClearCube();
-  cubeLayout[2][2]=B00110;
-  cubeLayout[2][3]=B00110;
-  cubeLayout[3][2]=B00110;
-  cubeLayout[3][3]=B00110;
-  
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(1);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(2);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(2);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(5);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(5);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(5,1);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(5,1);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(5);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(5);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(6);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(6);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-    TransformCube(4);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-
-  TransformCube(4,1);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-    TransformCube(4,1);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-  TransformCube(4,1);
-  ShowDesignV2(cubeLayout, RunTime/steps); 
-
-}
-
 void TransformCube(uint8_t transformDirection, uint8_t wrap) {
+  //Shifts the current design of cubeLayout array in a particular direction
   //Wrap 0 does not wrap around and clears any data pushed off
   //Wrap 1 wraps data around the cube
   //Wrap 2 does not wrap around, but does not clear out previous data in last dimension
@@ -978,13 +975,14 @@ void FillCube () {
   //Turns on all LEDs for the cube
   for (byte layer=0; layer<=4; layer++) {
     for (byte row=0; row<=4; row++) {
-      cubeLayout[layer][row]=31;
+      cubeLayout[layer][row]=31; //31 Decimal is 11111 in binary and will set all LED in a row to be enabled
     }
   }
 }
   
 
 void DesignDiagonalFillV3 (unsigned long RunTime, uint8_t width) {
+  //Fills the cube diagonally with a determined width.
   //uint8_t steps=13+width+width+3; //Total number of steps to take when 2 swipes
   uint8_t steps=13+width;
   ClearCube(); //Turn off the cube output before adding new pattern
@@ -1028,57 +1026,34 @@ void DesignDiagonalFillV3 (unsigned long RunTime, uint8_t width) {
 void ShowDesignV2(int frame[5][5], unsigned long RunTime) {
   //Accepts a 5 array and displays the output simultaneous
   //Output is significantly dimmer than single as we are flashing off and on and limited power per layer
-
-unsigned long ledLine[5];
-//Take all layer and row information and put into a long array for each layer to walk through
-for (int layer=0; layer<=4; layer++) {
-  for (int row=4; row>=0; row--) {
-    if (row == 4) ledLine[layer]=frame[layer][4]; //For first entry, set the value to the lowest row, since the decoders are connected starting at the bottom if viewed from above.
-    else ledLine[layer] = (ledLine[layer] << 5) | frame[layer][row]; //Shift the existing values to the left by 5 digits, then OR the next row into the empty area
+  
+  unsigned long ledLine[5];
+  //Take all layer and row information and put into a long binary sequence for each layer to walk through
+  for (int layer=0; layer<=4; layer++) {
+    for (int row=4; row>=0; row--) {
+      if (row == 4) ledLine[layer]=frame[layer][4]; //For first entry, set the value to the lowest row, since the decoders are connected starting at the bottom if viewed from above.
+      else ledLine[layer] = (ledLine[layer] << 5) | frame[layer][row]; //Shift the existing values to the left by 5 digits, then OR the next row into the empty area
+    }
+    ledLine[layer] = (ledLine[layer] << 7); //Shift further over by 7 digits to fill out the space for the 4th virtual decoder
   }
-  ledLine[layer] = (ledLine[layer] << 7); //Shift further over by 7 digits to fill out the space for the 4th virtual decoder
-}
-  /*
-  Serial.println(RunTime);
-  Serial.println(ledLine[0]);
-  Serial.println(ledLine[1]);
-  Serial.println(ledLine[2]);
-  Serial.println(ledLine[3]);
-  Serial.println(ledLine[4]);
-  */
   unsigned long StartTime = millis();
   unsigned long CurrentTime = millis();
   //Run through this function for the specified amount of time
   while (CurrentTime - StartTime <= RunTime) {
-    /*
-    String space = " ";
-    String stringOutput=CurrentTime + space + StartTime + space + RunTime;
-    Serial.println(stringOutput);
-    */
     for (int layer=0;layer<=4;layer++) { //Cycle through each layer
       FullReset(); // Turn off all output to prepare for this layer
       SetLayer(layer, "On");
       //Cycle through each element to see if the decoder output needs to be on, and if so, activate it  
       for (int output=0; output<=7; output++) {
         for (int decoder=0; decoder<=3; decoder++) {
-                  /*
-                  unsigned long shift=31-(decoder*8)-output;
-                  String stringShift = " Shift ";
-                  String stringBit = " BitResult ";
-                  unsigned long BitResult = ledLine[layer] & (1<<shift);
-                  String stringDecoder = " Decoder ";
-                  String stringOutput = " Output ";
-                  String SerialOutput = stringShift + shift + stringBit + BitResult + stringDecoder + decoder + stringOutput + output;
-                  Serial.println(SerialOutput);
-                  */
-          //if (ledLine[layer] & (1<<31-(decoder*8)-output)) { //Need to shift over 31 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output
+          //if (ledLine[layer] & (1L<<31-(decoder*8)-output)) { //Need to shift over 31 digits to start at first position, if working on another decoder, move 8 less digits, and one less per output (Was not working, but changed to 1L which I think will make it work
           if (ledLine[layer] & (2147483648 >>(decoder*8)+output)) {//Possibly simpler to understand, as the starting point is at LED 0 and then shifting to the right
-                  SetDecoder(decoder, output); 
-                } else {
-                    //digitalWrite(EnableDecoder[decoder], LOW);
-                    if (decoder <=2 ) digitalWrite(EnableDecoder[decoder], LOW);
-                    if (decoder == 3) digitalWrite(col25, LOW);
-            }
+            SetDecoder(decoder, output); 
+          } else {
+            //digitalWrite(EnableDecoder[decoder], LOW);
+            if (decoder <=2 ) digitalWrite(EnableDecoder[decoder], LOW);
+            if (decoder == 3) digitalWrite(col25, LOW);
+          }
         }
       }
     CurrentTime = millis();
@@ -1088,7 +1063,8 @@ for (int layer=0; layer<=4; layer++) {
 }
   
 void DesignFirework(unsigned long RunTime) {
-  // shows a column going up, then explosions with random LEDs on 2 layers and fading out
+  //Shows a column going up, then explosions with random LEDs on 2 layers at a time and fading out
+  //Due to the dimmer nature of cycling so many pins, the fade doesn't really show up until it is significantly lower
   ColumnUp(12, 150);
   //Randomly flash LED on two layers at a time, fading out each time
   for (int minled=75, maxLed=125, brightness=193; minled>=0; minled=minled-25, maxLed=maxLed-25, brightness=brightness-64) {
@@ -1302,8 +1278,11 @@ void DesignCheckerboardV2(unsigned long RunTime) {
 
 
 void ShowDesign(boolean frame[5][5][5], unsigned long RunTime) {
+  //Attempt 1 
   //Accepts a 5x5x5 boolean array and displays the output simultaneous
   //Output is significantly dimmer than single as we are flashing off and on and limited power per layer
+  //Retired for another design using a 2 dimensional array with a 5 byte value for each row, which uses significantly less memory
+  //With this design, a function can only have the 3D array defined around 4-6 times before the RAM is consumed and causes the Arduino to reboot
   boolean frameDecoderView [5][4][8];
  
   for (int layer=0; layer<=4; layer++) {
@@ -1468,6 +1447,8 @@ void FillFullCubeUp (int RunTime) {
 
 void CyclePins(int RunTime) {
   //Cycles through all Decoder pins for a specified amount of milliseconds
+  //Note, this does not enable the layers, you must use SetLayer to enable desired layers
+  //Enable each decoder
   for (int x=0; x<=3; x++) digitalWrite(EnableDecoder[x], HIGH);
   long StartTime = millis();
   unsigned long CurrentTime = millis();
@@ -1489,6 +1470,8 @@ void CyclePins(int RunTime) {
 }
 
 void LightFullCube (int RunTime) {
+  //Occasionally this will cause the Arduino to reboot.  Most likely due to too much draw when all layers are on and all decoders are active
+  //See ShowDesign for a better way, although somewhat dimmer
   //Lights all LED on the entire cube for a duration of milliseconds
   for (int x=0; x<=4; x++) SetLayer(x, "On"); //Turn all layers on
   //Run through this function for the specified amount of time
@@ -1635,7 +1618,7 @@ void WalkLayerUpDownReverse(int delayTime) {
 }
 
 void WalkLayerUpDown(int delayTime) {
-  //Rather than walking through LED sequentially, go up and down the columns going up
+  //Rather than walking through LED sequentially, go up and down the columns going up the cube
   int interval = 5;
   int i = 0;
   int direction = 1;
@@ -1664,6 +1647,7 @@ void WalkLayerUpDown(int delayTime) {
 }
 
 void Status() {
+  //Used for Diagnostics to see what the status of decoders and layers is
   int layerstatus;
   for (int i=0; i<3; i++) {
     String line1 = "Decoder ";
@@ -1692,6 +1676,7 @@ void Status() {
 }
  
 void led(int targetLed, int brightness) {
+  //Lights up a single LED at the desired intensity from 0-255
   //Calculate which layer needs to be used
   //Divide the targetLed by the total number of columns in a layer
   //Since it will round down to the nearest whole number, this gives the layer
@@ -1770,6 +1755,7 @@ void FullReset() {
 
 void AllLayersOn() {
   //Sets pins to high for all layers
+  //Due to design limitations, may not be wise and the Arduino may reboot
   digitalWrite(Layer[0], HIGH);
   digitalWrite(Layer[1], HIGH);
   digitalWrite(Layer[2], HIGH);
@@ -1787,6 +1773,7 @@ void LayerWalk(int delayTime){
 
 int freeRam () {
   //http://playground.arduino.cc/Code/AvailableMemory
+  //Used for diagnostics to see how much RAM is free and if it is causing the Arduino to crash
   extern int __heap_start, *__brkval; 
   int v; 
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
